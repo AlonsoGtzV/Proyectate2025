@@ -1,0 +1,12 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://<tu-endpoint>.rds.amazonaws.com:5432/english_db
+    username: tu_usuario
+    password: tu_contraseña
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
