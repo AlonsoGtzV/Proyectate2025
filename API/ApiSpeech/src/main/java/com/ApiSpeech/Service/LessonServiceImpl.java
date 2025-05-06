@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class LessonServiceImpl implements LessonService {
     private final List<Lesson> lessons = new ArrayList<>();
     private Long lessonId = 1L;
