@@ -3,10 +3,22 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://<tu-endpoint>.rds.amazonaws.com:5432/english_db
-    username: tu_usuario
-    password: tu_contraseña
+    url: jdbc:postgresql://pruebasynspeech.cmn5b0a2bh6p.us-east-1.rds.amazonaws.com:5432/pruebas
+    username: pacoeco
+    password: jfaap234
+    driver-class-name: org.postgresql.Driver
   jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
+      hibernate:
+        ddl-auto: update  # Crea/actualiza tablas automáticamente
+      show-sql: true      # Muestra consultas SQL en consola (debug)
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.PostgreSQLDialect
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
