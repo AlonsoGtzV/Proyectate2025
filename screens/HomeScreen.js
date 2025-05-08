@@ -33,7 +33,7 @@ export default function HomeScreen({ navigation }) {
           source={require("../assets/Synlogo.png")}
           style={styles.logo}
         />
-        <Text style={styles.headerText}>SYNSPEECH</Text>
+        <Text style={styles.headerText}>SynSpeech</Text>
       </View>
 
       {/* Unidades */}
@@ -87,8 +87,12 @@ export default function HomeScreen({ navigation }) {
 
       {/* Footer */}
       <View style={styles.footer}>
-        <Ionicons name="calendar" size={24} color="#000" style={styles.footerIcon1} />
-        <Ionicons name="stats-chart" size={24} color="#000" style={styles.footerIcon2} />
+        <TouchableOpacity onPress={() => navigation.navigate("Syllabus")} style={styles.footerIcon1} >
+        <Ionicons name="calendar" size={24} color="#000" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Progress")} style={styles.footerIcon2}>
+        <Ionicons name="stats-chart" size={24} color="#000" />
+        </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigation.navigate("Home")}
           style={styles.footerLogoButton}
@@ -98,7 +102,9 @@ export default function HomeScreen({ navigation }) {
             style={styles.footerLogo}
           />
         </TouchableOpacity>
-        <Ionicons name="chatbubble-ellipses" size={24} color="#000" style={styles.footerIcon3} />
+        <TouchableOpacity onPress={() => navigation.navigate("ChatBot")}  style={styles.footerIcon3}>
+                    <Ionicons name="chatbubble-ellipses" size={24} color="#000" />
+                </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigation.navigate("User")}
           style={styles.footerIcon4}

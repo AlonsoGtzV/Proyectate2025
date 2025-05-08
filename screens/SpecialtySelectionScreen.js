@@ -40,7 +40,10 @@ export default function SpecialtySelectionScreen({ navigation }) {
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={selectedSpecialty}
-          onValueChange={(itemValue) => setSelectedSpecialty(itemValue)}
+          onValueChange={(itemValue) => {
+            setSelectedSpecialty(itemValue);
+            console.log(`Área seleccionada: ${itemValue}`);
+          }}
           style={styles.picker}
         >
           {specialties.map((specialty, index) => (
@@ -48,6 +51,17 @@ export default function SpecialtySelectionScreen({ navigation }) {
           ))}
         </Picker>
       </View>
+
+      <TouchableOpacity
+        style={styles.continueButton}
+        onPress={() => { 
+          if(selectedSpecialty){
+            navigation.navigate("Home");
+          } 
+        }}
+      >
+        <Text style={styles.continueText}>Continuar</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -117,5 +131,17 @@ const styles = StyleSheet.create({
   picker: {
     width: '100%',
     height: 50,
+  },
+  continueButton: {
+    marginTop: 30,
+    backgroundColor: '#2b64a1',
+    padding: 12,
+    borderRadius: 8,
+    width: '50%',
+    alignItems: 'center',
+  },
+  continueText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });

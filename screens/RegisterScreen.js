@@ -1,53 +1,140 @@
-import React from "react";
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from "react-native";
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Image, ScrollView, StyleSheet, Alert} from 'react-native';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { useNavigation } from "@react-navigation/native";
 
-const RegisterScreen = ({ navigation }) => {
+export default function RegisterScreen() {
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [repeatPassword, setRepeatPassword] = useState('');
+  const [birthday, setBirthday] = useState('');
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+  const navigation = useNavigation(); // Hook para la navegación
+
+  const showDatePicker = () => setDatePickerVisibility(true);
+  const hideDatePicker = () => setDatePickerVisibility(false);
+  const handleConfirm = (date) => {
+    setBirthday(date.toLocaleDateString());
+    hideDatePicker();
+  };
+
+  const handleSignUp = () => {
+    console.log({ username, email, password, repeatPassword, birthday });
+    Alert.alert("Registro exitoso", "¡Bienvenido a SynSpeech!");
+    navigation.navigate("Login"); // Navegar a la pantalla de inicio de sesión después del registro
+  };
+
   return (
-    <View style={styles.container}>
-      {/* Logo */}
-      <Image source={require("../assets/Synlogo.png")} style={styles.logo} />
+    <ScrollView contentContainerStyle={styles.container}>
+      <Image
+        source={require('../assets/Synlogo.png')} // Ajusta esta ruta según la ubicación de tu logo
+        style={styles.logo}
+        resizeMode="contain"
+      />
 
-      {/* Inputs */}
-      <TextInput style={styles.input} placeholder="Full Name" />
-      <TextInput style={styles.input} placeholder="Email" keyboardType="email-address" />
-      <TextInput style={styles.input} placeholder="Password" secureTextEntry />
-      <TextInput style={styles.input} placeholder="Repeat Password" secureTextEntry />
+      <TextInput
+        style={styles.input}
+        placeholder="Nombre de usuario"
+        value={username}
+        onChangeText={setUsername}
+      />
 
-      {/* Birthday */}
-      <Text style={styles.label}>Birthday:</Text>
-      <View style={styles.birthdayContainer}>
-        <TextInput style={styles.birthdayInput} placeholder="DD" keyboardType="numeric" />
-        <TextInput style={styles.birthdayInput} placeholder="MM" keyboardType="numeric" />
-        <TextInput style={styles.birthdayInput} placeholder="YY" keyboardType="numeric" />
-      </View>
+      <TextInput
+        style={styles.input}
+        placeholder="Correo electrónico"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        value={email}
+        onChangeText={setEmail}
+      />
 
-      {/* Botón de registro */}
-      <TouchableOpacity style={styles.signUpButton}>
-        <Text style={styles.signUpText}>Sign Up</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Contraseña"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Repetir contraseña"
+        secureTextEntry
+        value={repeatPassword}
+        onChangeText={setRepeatPassword}
+      />
+
+      <TouchableOpacity onPress={showDatePicker} style={styles.input}>
+        <Text style={{ color: birthday ? '#000' : '#aaa' }}>
+          {birthday || 'Selecciona tu fecha de nacimiento'}
+        </Text>
       </TouchableOpacity>
 
-      {/* Hipervínculo a Login */}
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        onConfirm={handleConfirm}
+        onCancel={hideDatePicker}
+      />
+
+      <TouchableOpacity style={styles.button} onPress={handleSignUp}>
+        <Text style={styles.buttonText}>Registrarse</Text>
+      </TouchableOpacity>
+
       <Text style={styles.loginText}>
-        Already have an account?{" "}
-        <Text style={styles.link} onPress={() => navigation.navigate("Login")}>
-          Log in
+        ¿Ya tienes una cuenta?{' '}
         </Text>
-      </Text>
-    </View>
+      <TouchableOpacity style = {styles.login} onPress={() => navigation.navigate("Login")}>
+        <Text style={styles.loginLink}>Inicia sesión</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#EFF1EC", alignItems: "center", justifyContent: "center", paddingHorizontal: 20 },
-  logo: { width: 150, height: 150, resizeMode: "contain", marginBottom: 20 },
-  input: { width: "100%", padding: 15, borderWidth: 1, borderColor: "#ccc", borderRadius: 10, backgroundColor: "#fff", marginBottom: 10 },
-  label: { alignSelf: "flex-start", marginLeft: 5, marginBottom: 5 },
-  birthdayContainer: { flexDirection: "row", justifyContent: "space-between", width: "100%", marginBottom: 10 },
-  birthdayInput: { width: "30%", padding: 10, borderWidth: 1, borderColor: "#ccc", borderRadius: 10, backgroundColor: "#fff", textAlign: "center" },
-  signUpButton: { width: "100%", backgroundColor: "#1D4ED8", padding: 15, borderRadius: 10, alignItems: "center", marginBottom: 10 },
-  signUpText: { color: "#fff", fontWeight: "bold" },
-  loginText: { marginTop: 10, fontSize: 14 },
-  link: { color: "#1D4ED8", fontWeight: "bold" },
+  container: {
+    flexGrow: 1,
+    padding: 20,
+    alignItems: 'center',
+    backgroundColor: '#EFF1EC',
+  },
+  logo: {
+    width: 200,
+    height: 200,
+    marginBottom: 30,
+    marginTop: 40,
+  },
+  input: {
+    width: '100%',
+    padding: 12,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 8,
+    marginBottom: 15,
+    backgroundColor: '#fff',
+  },
+  button: {
+    backgroundColor: '#2c6d9e',
+    padding: 15,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+    marginVertical: 15,
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  loginText: {
+    fontSize: 14,
+    textAlign: "center", // Asegura que el texto esté centrado
+    flexDirection: "row", // Alinea los elementos en una fila
+  },
+  loginLink: {
+    color: "#007bff",
+    fontWeight: "bold",
+    marginTop: 3
+  },
 });
-
-export default RegisterScreen;

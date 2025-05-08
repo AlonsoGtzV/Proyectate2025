@@ -1,20 +1,19 @@
+// screens/LoginScreen.js
 import { StatusBar } from "expo-status-bar";
 import { Text, View, Image, TextInput, TouchableOpacity } from "react-native";
-import { FontAwesome } from "@expo/vector-icons"; // Para los iconos en los inputs
-import { useNavigation } from "@react-navigation/native"; // Importar navegación
+import { FontAwesome } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import styles from "../styles/styles";
 
 export default function LoginScreen() {
-  const navigation = useNavigation(); // Hook para navegar entre pantallas
+  const navigation = useNavigation();
 
   return (
     <View style={styles.container}>
-      {/* Logo */}
       <View style={styles.header}>
         <Image source={require("../assets/Synlogo.png")} style={styles.logo} />
       </View>
 
-      {/* Inputs */}
       <View style={styles.inputContainer}>
         <View style={styles.inputWrapper}>
           <FontAwesome name="envelope" size={18} color="#666" style={styles.icon} />
@@ -28,24 +27,20 @@ export default function LoginScreen() {
         </View>
       </View>
 
-      {/* Forgot Password */}
       <TouchableOpacity>
         <Text style={styles.forgotPassword}>¿Olvidaste tu contraseña?</Text>
       </TouchableOpacity>
 
-      {/* Botón de acceso */}
-      <TouchableOpacity style={styles.loginButton}>
+      <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate("LanguageSelection")}>
         <Text style={styles.loginButtonText}>Acceder</Text>
       </TouchableOpacity>
 
-      {/* Separador */}
       <View style={styles.separatorContainer}>
         <View style={styles.separatorLine} />
         <Text style={styles.separatorText}>O</Text>
         <View style={styles.separatorLine} />
       </View>
 
-      {/* Botones sociales */}
       <TouchableOpacity style={styles.socialButtonGoogle}>
         <Image source={require("../assets/google.png")} style={styles.socialIcon} />
         <Text style={styles.socialButtonText}>Continuar con Google</Text>
@@ -56,7 +51,6 @@ export default function LoginScreen() {
         <Text style={styles.socialButtonappleText}>Continuar con Apple</Text>
       </TouchableOpacity>
 
-      {/* Registro */}
       <Text style={styles.registerText}>¿Usuario nuevo?</Text>
       <TouchableOpacity onPress={() => navigation.navigate("Register")}>
         <Text style={styles.registeruser}>Regístrate aquí</Text>

@@ -16,69 +16,85 @@ export default function Screen({ navigation }) {
     <View style={styles.container}>
       {/* Encabezado */}
       <View style={styles.header}>
+        <Image
+          source={require("../assets/Synlogo.png")}
+          style={styles.logo}
+        />
         <Text style={styles.headerText}>Perfil</Text>
       </View>
 
-      <ScrollView style={styles.lessonContainer} contentContainerStyle={styles.scrollContent}>
-        {/* Imagen de perfil */}
-        <View style={styles.profileImage}>
-          <Ionicons name="person-circle-outline" size={70} color="#B0B0B0" />
-          <Entypo name="plus" size={18} color="#000" style={styles.addIcon} />
-        </View>
-
+      <ScrollView
+        style={styles.lessonContainer}
+        contentContainerStyle={styles.scrollContent}
+      >
         {/* Personal Info */}
-        <Text style={styles.sectionTitle}>Personal information</Text>
-        <TextInput placeholder="Name" style={styles.input} />
-        <TextInput placeholder="Email" style={styles.input} />
+        <Text style={styles.sectionTitle}>Información personal</Text>
+        <TextInput placeholder="Nombre" style={styles.input} />
+        <TextInput placeholder="Correo electrónico" style={styles.input} />
 
         {/* User Settings */}
-        <Text style={styles.sectionTitle}>User settings</Text>
-        <TextInput placeholder="Interface language" style={styles.input} />
-        <TextInput placeholder="Area of interest" style={styles.input} />
-        <TextInput placeholder="Learning objectives" style={styles.input} />
+        <Text style={styles.sectionTitle}>Ajustes</Text>
+        <TextInput placeholder="Idioma de interfaz" style={styles.input} />
+        <TextInput placeholder="Área de interés" style={styles.input} />
 
         {/* Notification Settings */}
-        <Text style={styles.sectionTitle}>Notification settings</Text>
+        <Text style={styles.sectionTitle}>Ajustes de notificaciones</Text>
         <View style={styles.row}>
-          <Text style={styles.label}>Study reminders</Text>
+          <Text style={styles.label}>Recordatorios de estudio</Text>
           <Switch value={true} />
         </View>
-        <TextInput placeholder="Notification frequency" style={styles.input} />
-        <TextInput placeholder="Notification schedule" style={styles.input} />
 
         {/* Visualization Settings */}
-        <Text style={styles.sectionTitle}>Visualization settings</Text>
+        <Text style={styles.sectionTitle}>Ajustes de vizualización</Text>
         <View style={styles.row}>
-          <Text style={styles.label}>Dark mode</Text>
+          <Text style={styles.label}>Modo Oscuro</Text>
           <Switch value={false} />
         </View>
-        <TextInput placeholder="Font size" style={styles.input} />
 
         {/* Buttons */}
-        <Text style={styles.sectionTitle}>Help and support</Text>
+        <Text style={styles.sectionTitle}>Ayuda y Soporte</Text>
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Tutorial</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Support</Text>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate("Support")}
+        >
+          <Text style={styles.buttonText}>Soporte</Text>
         </TouchableOpacity>
       </ScrollView>
 
       {/* Footer */}
       <View style={styles.footer}>
-        <Ionicons name="calendar" size={24} color="#000" style={styles.footerIcon1} />
-        <Ionicons name="stats-chart" size={24} color="#000" style={styles.footerIcon2} />
         <TouchableOpacity
-            onPress={() => navigation.navigate('Home')}
-            style={styles.footerLogoButton}>
-            <Image
-                source={require('../assets/Synlogo.png')}
-                style={styles.footerLogo}/>
+          onPress={() => navigation.navigate("Syllabus")}
+          style={styles.footerIcon1}
+        >
+          <Ionicons name="calendar" size={24} color="#000" />
         </TouchableOpacity>
-
-        <Ionicons name="chatbubble-ellipses" size={24} color="#000" style={styles.footerIcon3} />
         <TouchableOpacity
-          onPress={() => navigation.navigate('User')} // Navega a User
+          onPress={() => navigation.navigate("Progress")}
+          style={styles.footerIcon2}
+        >
+          <Ionicons name="stats-chart" size={24} color="#000" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Home")}
+          style={styles.footerLogoButton}
+        >
+          <Image
+            source={require("../assets/Synlogo.png")}
+            style={styles.footerLogo}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("ChatBot")}
+          style={styles.footerIcon3}
+        >
+          <Ionicons name="chatbubble-ellipses" size={24} color="#000" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("User")}
           style={styles.footerIcon4}
         >
           <Ionicons name="person-circle" size={26} color="#000" />
@@ -98,9 +114,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#2C5E86",
     padding: 15,
-    paddingTop: 60,
+    paddingTop: 50,
     justifyContent: "center",
     gap: 10,
+    width: "100%",
+    marginBottom: 10,
+  },
+  logo: {
+    width: 50,
+    height: 50,
+    marginRight: 10,
+    resizeMode: "contain",
+    borderRadius: 25,
+    backgroundColor: "#EFF1EC",
   },
   headerText: {
     color: "white",
@@ -130,7 +156,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#EFF1EC",
     borderRadius: 40,
     borderWidth: 2,
-    borderColor: "#BDE4E6", 
+    borderColor: "#BDE4E6",
     width: 80,
     height: 80,
     justifyContent: "center",

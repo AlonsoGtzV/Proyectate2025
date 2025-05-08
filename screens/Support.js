@@ -116,8 +116,12 @@ export default function Support({ navigation }) {
 
       {/* Footer */}
       <View style={styles.footer}>
-        <Ionicons name="calendar" size={24} color="#000" style={styles.footerIcon1} />
-        <Ionicons name="stats-chart" size={24} color="#000" style={styles.footerIcon2} />
+        <TouchableOpacity onPress={() => navigation.navigate("Syllabus")} style={styles.footerIcon1}>
+          <Ionicons name="calendar" size={24} color="#000" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Progress")} style={styles.footerIcon2}>
+          <Ionicons name="stats-chart" size={24} color="#000" />
+        </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigation.navigate("Home")}
           style={styles.footerLogoButton}
@@ -145,7 +149,10 @@ export default function Support({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#EFF0EB" },
+  container: {
+    flex: 1,
+    backgroundColor: "#EFF0EB",
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
