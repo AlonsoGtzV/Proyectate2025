@@ -7,6 +7,10 @@ import LanguageSelectionScreen from "./screens/LanguageSelectionScreen";
 import SpecialtySelectionScreen from "./screens/SpecialtySelectionScreen";
 import HomeScreen from "./screens/HomeScreen";
 import UserScreen from "./screens/UserScreen"; // Asegúrate de tener esta pantalla creada
+import ChatBot from "./screens/ChatBot";
+import Support from "./screens/Support";
+import Syllabus from "./screens/Syllabus";
+import ProgressScreen from "./screens/ProgressScreen";
 
 const Stack = createStackNavigator();
 
@@ -21,6 +25,10 @@ export default function App() {
         <Stack.Screen name="SpecialtySelection" component={SpecialtySelectionScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="User" component={UserScreen} />
+        <Stack.Screen name="ChatBot" component={ChatBot} />
+        <Stack.Screen name="Support" component={Support} />
+        <Stack.Screen name="Syllabus" component={Syllabus} />
+        <Stack.Screen name="Progress" component={ProgressScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
