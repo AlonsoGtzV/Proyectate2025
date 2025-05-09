@@ -3,7 +3,7 @@ package com.ApiSpeech.Controller;
 
 import com.ApiSpeech.Dto.UserLoginDto;
 import com.ApiSpeech.Dto.UserRegisterDto;
-import com.ApiSpeech.Model.User;
+import com.ApiSpeech.Model.Users;
 import com.ApiSpeech.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,17 +18,17 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    public User register(@RequestBody UserRegisterDto dto) {
+    public Users register(@RequestBody UserRegisterDto dto) {
         return userService.register(dto);
     }
 
     @PostMapping("/login")
-    public User login(@RequestBody UserLoginDto dto) {
+    public Users login(@RequestBody UserLoginDto dto) {
         return userService.login(dto);
     }
 
     @GetMapping
-    public List<User> getAll() {
+    public List<Users> getAll() {
         return userService.getAll();
     }
 }

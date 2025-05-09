@@ -1,8 +1,8 @@
 package com.ApiSpeech.Repository;
 
-import com.ApiSpeech.Model.User;
+import com.ApiSpeech.Model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepository extends JpaRepository<User, Long> {
-    User findByUsername(String username);
+public interface UserRepository extends JpaRepository<Users, Long> {
+    Users findByCognitoUsername(String cognitoUsername);
 }

@@ -20,7 +20,7 @@ public class CognitoService {
 
     public CognitoService() {
         this.cognitoClient = CognitoIdentityProviderClient.builder()
-                .region(Region.US_EAST_1) // Cambia a tu región
+                .region(Region.US_EAST_1)
                 .credentialsProvider(DefaultCredentialsProvider.create())
                 .build();
     }
