@@ -22,3 +22,8 @@ springdoc:
     operations-sorter: alpha
   api-docs:
     path: /v3/api-docs
+
+aws:
+  cognito:
+    userPoolId: us-east-1_XXXXXXXXX
+    clientId: XXXXXXXXXXXXXXXXXXXXXXXX
