@@ -3,17 +3,17 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://synspeechdb.cmn5b0a2bh6p.us-east-1.rds.amazonaws.com:5432/configuser
+    url: jdbc:postgresql://synspeechdb.cmn5b0a2bh6p.us-east-1.rds.amazonaws.com:5432/users
     username: pacoeco
     password: jfaap234
     driver-class-name: org.postgresql.Driver
+
   security:
     oauth2:
       client:
         registration:
           cognito:
-            client-id: 6oeo4jk5l74blkeubgrsrvvv23
-            client-secret: <client secret>
+            client-id: 2fkd1v6vjah67ngqi1qdb8u7fe
             scope:
               - phone
               - openid
@@ -23,6 +23,7 @@ spring:
           cognito:
             issuerUri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_9K4qyEk4E
             user-name-attribute: username
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -33,8 +34,8 @@ spring:
 
 aws:
   cognito:
-    userPoolId: us-east-1_9K4qyEk4E # Agregado para resolver el placeholder
-    clientId: 6oeo4jk5l74blkeubgrsrvvv23 # Ya estaba definido
+    userPoolId: us-east-1_9K4qyEk4E
+    clientId: 2fkd1v6vjah67ngqi1qdb8u7fe
 
 springdoc:
   swagger-ui:
@@ -43,3 +44,7 @@ springdoc:
     operations-sorter: alpha
   api-docs:
     path: /v3/api-docs
+
+logging:
+  level:
+    org.springframework.security: DEBUG

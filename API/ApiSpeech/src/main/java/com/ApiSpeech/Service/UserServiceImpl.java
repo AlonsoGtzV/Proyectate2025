@@ -4,6 +4,7 @@ import com.ApiSpeech.Dto.UserLoginDto;
 import com.ApiSpeech.Dto.UserRegisterDto;
 import com.ApiSpeech.Model.Users;
 import com.ApiSpeech.Repository.UserRepository;
+import com.ApiSpeech.Util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,9 @@ import java.util.Map;
 
 @Service
 public class UserServiceImpl implements UserService {
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Autowired
     private UserRepository userRepository;
@@ -48,6 +52,11 @@ public class UserServiceImpl implements UserService {
 
         try {
             cognitoClient.signUp(signUpRequest);
+            AdminConfirmSignUpRequest confirmRequest = AdminConfirmSignUpRequest.builder()
+                    .userPoolId(userPoolId)
+                    .username(dto.getUsername())
+                    .build();
+            cognitoClient.adminConfirmSignUp(confirmRequest);
         } catch (UsernameExistsException e) {
             throw new RuntimeException("El usuario ya existe en Cognito.");
         } catch (CognitoIdentityProviderException e) {
@@ -66,20 +75,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Users login(UserLoginDto dto) {
+    public String login(UserLoginDto dto) {
         // 1. Autenticación con Cognito
         try {
-            AdminInitiateAuthRequest authRequest = AdminInitiateAuthRequest.builder()
-                    .userPoolId(userPoolId)
+            InitiateAuthRequest authRequest = InitiateAuthRequest.builder()
+                    .authFlow(AuthFlowType.USER_PASSWORD_AUTH) // Cambiar flujo de autenticación
                     .clientId(clientId)
-                    .authFlow(AuthFlowType.ADMIN_NO_SRP_AUTH)
                     .authParameters(Map.of(
                             "USERNAME", dto.getUsername(),
                             "PASSWORD", dto.getPassword()
                     ))
                     .build();
 
-            cognitoClient.adminInitiateAuth(authRequest);
+            cognitoClient.initiateAuth(authRequest);
         } catch (NotAuthorizedException e) {
             throw new RuntimeException("Usuario o contraseña incorrectos.");
         } catch (UserNotFoundException e) {
@@ -89,11 +97,12 @@ public class UserServiceImpl implements UserService {
         }
 
         // 2. Buscar configuración del usuario
-        return userRepository.findByCognitoUsername(dto.getUsername());
+        return jwtUtil.generateToken(dto.getUsername());
     }
 
     @Override
     public List<Users> getAll() {
+        // Verificar que la conexión a la base de datos esté configurada correctamente
         return userRepository.findAll();
     }
 }
