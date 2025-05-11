@@ -5,6 +5,7 @@ import com.ApiSpeech.Dto.UserRegisterDto;
 import com.ApiSpeech.Model.Users;
 import com.ApiSpeech.Repository.UserRepository;
 import com.ApiSpeech.Util.JwtUtil;
+import com.ApiSpeech.Exception.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -104,5 +105,25 @@ public class UserServiceImpl implements UserService {
     public List<Users> getAll() {
         // Verificar que la conexión a la base de datos esté configurada correctamente
         return userRepository.findAll();
+    }
+    @Override
+    public Users getById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("Usuario con ID " + id + " no encontrado."));
+    }
+
+    @Override
+    public Users update(Users user) {
+        if (!userRepository.existsById(user.getId())) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+        return userRepository.save(user);
+    }
+
+    @Override
+    public void delete(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new UserNotFoundException("Usuario con ID " + id + " no encontrado.");
+        }
+        userRepository.deleteById(id);
     }
 }

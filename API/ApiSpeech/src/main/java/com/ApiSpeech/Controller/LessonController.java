@@ -28,4 +28,24 @@ public class LessonController {
     public Lesson getById(@PathVariable Long id) {
         return lessonService.getById(id);
     }
+
+    @GetMapping("/filter")
+    public List<Lesson> getByFilters(
+            @RequestParam(required = false) String englishLevel,
+            @RequestParam(required = false) String languagePreference,
+            @RequestParam(required = false) String specificArea,
+            @RequestParam(required = false) String professionalismLevel) {
+        return lessonService.getByFilters(englishLevel, languagePreference, specificArea, professionalismLevel);
+    }
+    @PutMapping("/{id}")
+    public Lesson update(@PathVariable Long id, @RequestBody Lesson lesson) {
+        lesson.setId(id.toString());
+        return lessonService.update(lesson);
+    }
+
+    // Eliminar una lección por ID
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        lessonService.delete(id);
+    }
 }
