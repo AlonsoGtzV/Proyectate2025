@@ -31,4 +31,18 @@ public class UserController {
     public List<Users> getAll() {
         return userService.getAll();
     }
+
+    @GetMapping("/{id}")
+    public Users getById(@PathVariable Long id) { return userService.getById(id);}
+
+    // Actualizar un usuario por ID
+    @PutMapping("/{id}")
+    public Users update(@PathVariable Long id, @RequestBody Users user) {
+        user.setId(id);
+        return userService.update(user);
+    }
+
+    // Eliminar un usuario por ID
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) { userService.delete(id); }
 }

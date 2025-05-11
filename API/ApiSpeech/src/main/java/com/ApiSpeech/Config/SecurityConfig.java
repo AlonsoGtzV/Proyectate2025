@@ -21,7 +21,13 @@ public class SecurityConfig {
                                 "/api/chat",
                                 "/api/users/register",
                                 "/api/users/login",
-                                "/api/users",          // Permite acceso a todos los usuarios
+                                "/api/users",
+                                "/api/users/{id}",
+                                "/api/lessons/create",
+                                "/api/lessons/update",
+                                "/api/lessons/delete",
+                                "/api/lessons",
+                                "/api/lessons/{id}",
                                 "/swagger-ui/**",     // Permite Swagger UI
                                 "/v3/api-docs/**"     // Permite la documentación OpenAPI
                         ).permitAll()             // Sin autenticación
