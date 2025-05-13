@@ -9,10 +9,12 @@ import {
   StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "./ThemeContext";
 
 export default function ChatBot({ navigation }) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const { darkMode, toggleTheme } = useTheme();
 
   const handleSend = () => {
     if (message.trim() === "") return;
@@ -22,22 +24,82 @@ export default function ChatBot({ navigation }) {
     setMessage("");
   };
 
+  // Estilos dinámicos basados en el tema
+  const dynamicStyles = StyleSheet.create({
+    container: {
+      backgroundColor: darkMode ? '#121212' : '#EFF0EB',
+    },
+    header: {
+      backgroundColor: darkMode ? '#1E1E1E' : '#2C5E86',
+    },
+    headerText: {
+      color: darkMode ? '#E0E0E0' : 'white',
+    },
+    logo: {
+      backgroundColor: darkMode ? '#EFF1EC' : '#EFF1EC',
+    },
+    chatContainer: {
+      backgroundColor: darkMode ? '#121212' : '#EFF0EB',
+    },
+    userMessage: {
+      backgroundColor: darkMode ? '#2C5E86' : '#83D8E1',
+    },
+    aiMessage: {
+      backgroundColor: darkMode ? '#333' : '#CDE8F0',
+    },
+    messageText: {
+      color: darkMode ? '#E0E0E0' : '#000',
+    },
+    aiMessageContainer: {
+      backgroundColor: darkMode ? '#1E1E1E' : '#F0F8FF',
+      borderLeftColor: darkMode ? '#BDE4E6' : '#2C5E86',
+    },
+    aiMessageText: {
+      color: darkMode ? '#E0E0E0' : '#333',
+    },
+    inputContainer: {
+      backgroundColor: darkMode ? '#1E1E1E' : '#EFF1EC',
+      borderColor: darkMode ? '#333' : '#ccc',
+    },
+    textInput: {
+      backgroundColor: darkMode ? '#333' : '#fff',
+      color: darkMode ? '#E0E0E0' : '#000',
+    },
+    footer: {
+      backgroundColor: darkMode ? '#1E1E1E' : '#BDE4E6',
+    },
+    footerIcon: {
+      color: darkMode ? '#E0E0E0' : '#000',
+    },
+    footerLogoButton: {
+      backgroundColor: darkMode ? '#333' : '#EFF1EC',
+      borderColor: darkMode ? '#555' : '#BDE4E6',
+    },
+    footerLogo: {
+      borderColor: darkMode ? '#555' : '#BDE4E6',
+      backgroundColor: darkMode ? '#EFF1EC' : '#EFF1EC',
+    },
+    infoText: {
+      color: darkMode ? '#999' : '#666',
+    }
+  });
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, dynamicStyles.container]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, dynamicStyles.header]}>
         <Image
           source={require("../assets/Synlogo.png")}
-          style={styles.logo}
+          style={[styles.logo, dynamicStyles.logo]}
         />
-        <Text style={styles.headerText}>Chatbot</Text>
+        <Text style={[styles.headerText, dynamicStyles.headerText]}>Chatbot</Text>
       </View>
 
       {/* Chat Area */}
-      <ScrollView style={styles.chatContainer}>
+      <ScrollView style={[styles.chatContainer, dynamicStyles.chatContainer]}>
         {/* Mensaje de bienvenida de la IA */}
-        <View style={styles.aiMessageContainer}>
-          <Text style={styles.aiMessageText}>
+        <View style={[styles.aiMessageContainer, dynamicStyles.aiMessageContainer]}>
+          <Text style={[styles.aiMessageText, dynamicStyles.aiMessageText]}>
             ¡Hola! Soy Syn. Estoy aquí para ayudarte a aprender inglés técnico. 😊
           </Text>
         </View>
@@ -48,23 +110,23 @@ export default function ChatBot({ navigation }) {
             style={[
               styles.messageBubble,
               msg.sender === "user"
-                ? styles.userMessage
-                : styles.aiMessage,
+                ? [styles.userMessage, dynamicStyles.userMessage]
+                : [styles.aiMessage, dynamicStyles.aiMessage],
             ]}
           >
-            <Text style={styles.messageText}>{msg.text}</Text>
+            <Text style={[styles.messageText, dynamicStyles.messageText]}>{msg.text}</Text>
           </View>
         ))}
       </ScrollView>
 
       {/* Input */}
-      <View style={styles.inputContainer}>
+      <View style={[styles.inputContainer, dynamicStyles.inputContainer]}>
         <TextInput
-          style={styles.textInput}
+          style={[styles.textInput, dynamicStyles.textInput]}
           value={message}
           onChangeText={setMessage}
           placeholder="Escribe tu mensaje..."
-          placeholderTextColor="#999"
+          placeholderTextColor={darkMode ? "#999" : "#666"}
         />
         <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
           <Ionicons name="send" size={20} color="#fff" />
@@ -73,44 +135,60 @@ export default function ChatBot({ navigation }) {
 
       {/* Contenedor para los textos e información */}
       <View style={styles.infoContainer}>
-        <Text style={styles.infoText}>Syn puede cometer errores.</Text>
-        <Text style={styles.infoText}>Sé amable al chatear</Text>
+        <Text style={[styles.infoText, dynamicStyles.infoText]}>Syn puede cometer errores.</Text>
+        <Text style={[styles.infoText, dynamicStyles.infoText]}>Sé amable al chatear</Text>
       </View>
 
       {/* Footer */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, dynamicStyles.footer]}>
         <TouchableOpacity
           onPress={() => navigation.navigate("Syllabus")}
           style={styles.footerIcon1}
         >
-          <Ionicons name="calendar" size={24} color="#000" />
+          <Ionicons 
+            name="calendar" 
+            size={24} 
+            color={dynamicStyles.footerIcon.color} 
+          />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigation.navigate("Progress")}
           style={styles.footerIcon2}
         >
-          <Ionicons name="stats-chart" size={24} color="#000" />
+          <Ionicons 
+            name="stats-chart" 
+            size={24} 
+            color={dynamicStyles.footerIcon.color} 
+          />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigation.navigate("Home")}
-          style={styles.footerLogoButton}
+          style={[styles.footerLogoButton, dynamicStyles.footerLogoButton]}
         >
           <Image
             source={require("../assets/Synlogo.png")}
-            style={styles.footerLogo}
+            style={[styles.footerLogo, dynamicStyles.footerLogo]}
           />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigation.navigate("ChatBot")}
           style={styles.footerIcon3}
         >
-          <Ionicons name="chatbubble-ellipses" size={24} color="#000" />
+          <Ionicons 
+            name="chatbubble-ellipses" 
+            size={24} 
+            color={dynamicStyles.footerIcon.color} 
+          />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigation.navigate("User")}
           style={styles.footerIcon4}
         >
-          <Ionicons name="person-circle" size={26} color="#000" />
+          <Ionicons 
+            name="person-circle" 
+            size={26} 
+            color={dynamicStyles.footerIcon.color} 
+          />
         </TouchableOpacity>
       </View>
     </View>
@@ -197,21 +275,32 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 20,
     bottom: 10,
+    width: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   footerIcon2: {
     position: "absolute",
     left: 100,
     bottom: 10,
+    width: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   footerIcon3: {
     position: "absolute",
     right: 100,
     bottom: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   footerIcon4: {
     position: "absolute",
     right: 20,
     bottom: 10,
+    width: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   footerLogo: {
     width: 80,

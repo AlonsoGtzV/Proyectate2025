@@ -1,9 +1,62 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "./ThemeContext";
 
 export default function ProgressScreen({ navigation }) {
   const [expandedUnitIndex, setExpandedUnitIndex] = useState(null);
+  const {darkMode, toggleTheme} = useTheme();
+
+  const dynamicStyles = StyleSheet.create({
+      container: {
+        backgroundColor: darkMode ? '#121212' : '#EFF0EB',
+      },
+      header: {
+        backgroundColor: darkMode ? '#1E1E1E' : '#2C5E86',
+      },
+      headerText: {
+        color: darkMode ? '#E0E0E0' : 'white',
+      },
+      logo: {
+        backgroundColor: darkMode ? '#EFF1EC' : '#EFF1EC',
+      },
+      footer: {
+        backgroundColor: darkMode ? '#1E1E1E' : '#BDE4E6',
+      },
+      footerIcon: {
+        color: darkMode ? '#E0E0E0' : '#000',
+      },
+      footerLogoButton: {
+        backgroundColor: darkMode ? '#333' : '#EFF1EC',
+        borderColor: darkMode ? '#555' : '#BDE4E6',
+      },
+      footerLogo: {
+        borderColor: darkMode ? '#555' : '#BDE4E6',
+        backgroundColor: darkMode ? '#EFF1EC' : '#EFF1EC',
+      },
+      infoText: {
+        color: darkMode ? '#999' : '#666',
+      },
+      unitContainer: {
+  backgroundColor: darkMode ? "#1E1E1E" : "#FFFFFF",
+},
+unitTitle: {
+  color: darkMode ? "#E0E0E0" : "#333",
+},
+unitProgress: {
+  color: darkMode ? "#BDE4E6" : "#2C5E86",
+},
+lessonTitle: {
+  color: darkMode ? "#CCCCCC" : "#333",
+},
+lessonProgress: {
+  color: darkMode ? "#AAAAAA" : "#555",
+},
+lockedText: {
+  color: darkMode ? "#888" : "gray",
+},
+
+    });
 
   const units = [
     {
@@ -39,23 +92,25 @@ export default function ProgressScreen({ navigation }) {
   }, 0);
 
   const renderLesson = ({ item }) => (
-    <View style={styles.lessonContainer}>
-      <Text style={styles.lessonTitle}>{item.title}</Text>
-      <Text style={styles.lessonProgress}>{item.progress}</Text>
-    </View>
+    <View style={[styles.lessonContainer]}>
+  <Text style={[styles.lessonTitle, dynamicStyles.lessonTitle]}>{item.title}</Text>
+  <Text style={[styles.lessonProgress, dynamicStyles.lessonProgress]}>{item.progress}</Text>
+</View>
+
   );
 
   const renderUnit = ({ item, index }) => (
-    <View style={styles.unitContainer}>
-      <TouchableOpacity onPress={() => toggleExpand(index)} style={styles.unitHeader}>
-        <Text style={styles.unitTitle}>{item.title}</Text>
-        <Text style={styles.unitProgress}>Progreso: {item.progress}</Text>
-        <Ionicons
-          name={expandedUnitIndex === index ? "chevron-up" : "chevron-down"}
-          size={20}
-          color="#000"
-        />
-      </TouchableOpacity>
+    <View style={[styles.unitContainer, dynamicStyles.unitContainer]}>
+  <TouchableOpacity onPress={() => toggleExpand(index)} style={styles.unitHeader}>
+    <Text style={[styles.unitTitle, dynamicStyles.unitTitle]}>{item.title}</Text>
+    <Text style={[styles.unitProgress, dynamicStyles.unitProgress]}>Progreso: {item.progress}</Text>
+    <Ionicons
+      name={expandedUnitIndex === index ? "chevron-up" : "chevron-down"}
+      size={20}
+      color={darkMode ? "#E0E0E0" : "#000"}
+    />
+  </TouchableOpacity>
+
       {expandedUnitIndex === index && item.lessons.length > 0 && (
         <FlatList
           data={item.lessons}
@@ -70,12 +125,12 @@ export default function ProgressScreen({ navigation }) {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, dynamicStyles.container]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, dynamicStyles.header]}>
         <Image
           source={require("../assets/Synlogo.png")}
-          style={styles.logo}
+          style={[styles.logo, dynamicStyles.logo]}
         />
         <Text style={styles.headerText}>Progreso</Text>
         <View style={styles.keyContainer}>
@@ -93,22 +148,58 @@ export default function ProgressScreen({ navigation }) {
       />
 
       {/* Footer */}
-      <View style={styles.footer}>
-        <TouchableOpacity onPress={() => navigation.navigate("Syllabus")} style={styles.footerIcon1}>
-          <Ionicons name="calendar" size={24} color="#000" />
-        </TouchableOpacity>
-        <Ionicons name="stats-chart" size={24} color="#000" style={styles.footerIcon2} />
-        <TouchableOpacity onPress={() => navigation.navigate("Home")} style={styles.footerLogoButton}>
-          <Image source={require("../assets/Synlogo.png")} style={styles.footerLogo} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("ChatBot")} style={styles.footerIcon3}>
-          <Ionicons name="chatbubble-ellipses" size={24} color="#000" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("User")} style={styles.footerIcon4}>
-          <Ionicons name="person-circle" size={26} color="#000" />
-        </TouchableOpacity>
-      </View>
-    </View>
+            <View style={[styles.footer, dynamicStyles.footer]}>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Syllabus")}
+                style={styles.footerIcon1}
+              >
+                <Ionicons 
+                  name="calendar" 
+                  size={24} 
+                  color={dynamicStyles.footerIcon.color} 
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Progress")}
+                style={styles.footerIcon2}
+              >
+                <Ionicons 
+                  name="stats-chart" 
+                  size={24} 
+                  color={dynamicStyles.footerIcon.color} 
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Home")}
+                style={[styles.footerLogoButton, dynamicStyles.footerLogoButton]}
+              >
+                <Image
+                  source={require("../assets/Synlogo.png")}
+                  style={[styles.footerLogo, dynamicStyles.footerLogo]}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("ChatBot")}
+                style={styles.footerIcon3}
+              >
+                <Ionicons 
+                  name="chatbubble-ellipses" 
+                  size={24} 
+                  color={dynamicStyles.footerIcon.color} 
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("User")}
+                style={styles.footerIcon4}
+              >
+                <Ionicons 
+                  name="person-circle" 
+                  size={26} 
+                  color={dynamicStyles.footerIcon.color} 
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
   );
 }
 

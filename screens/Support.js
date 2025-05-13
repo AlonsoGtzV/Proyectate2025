@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { StatusBar } from "expo-status-bar";
 import {
   View,
   Text,
@@ -12,6 +13,7 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import { useTheme } from "./ThemeContext";
 
 const problems = [
   "Seleccione un problema...",
@@ -25,11 +27,12 @@ const problems = [
 export default function Support({ navigation }) {
   const [problemSelected, setProblemSelected] = useState(problems[0]);
   const [selectedImage, setSelectedImage] = useState(null);
+  const { darkMode } = useTheme();
 
   const handlePickImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images, // Cambiado a MediaTypeOptions.Images
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         quality: 1,
       });
@@ -43,50 +46,128 @@ export default function Support({ navigation }) {
     }
   };
 
+  // Estilos dinámicos basados en el tema
+  const dynamicStyles = StyleSheet.create({
+    container: {
+      backgroundColor: darkMode ? '#121212' : '#EFF0EB',
+    },
+    header: {
+      backgroundColor: darkMode ? '#1E1E1E' : '#2C5E86',
+    },
+    headerText: {
+      color: darkMode ? '#E0E0E0' : 'white',
+    },
+    logo: {
+      backgroundColor: darkMode ? '#EFF1EC' : '#EFF1EC',
+    },
+    question: {
+      color: darkMode ? '#E0E0E0' : '#000',
+    },
+    instructions: {
+      color: darkMode ? '#BDE4E6' : '#333',
+    },
+    input: {
+      backgroundColor: darkMode ? '#333' : '#DDD9D7',
+      color: darkMode ? '#E0E0E0' : '#000',
+    },
+    pickerContainer: {
+      backgroundColor: darkMode ? '#333' : '#fff',
+      borderColor: darkMode ? '#555' : '#ccc',
+    },
+    picker: {
+      backgroundColor: darkMode ? '#333' : '#DDD9D7',
+      color: darkMode ? '#E0E0E0' : '#000',
+    },
+    fileButton: {
+      backgroundColor: darkMode ? '#333' : '#DDD9D7',
+    },
+    fileButtonText: {
+      color: darkMode ? '#E0E0E0' : '#333',
+    },
+    sendButton: {
+      backgroundColor: darkMode ? '#2C5E86' : '#2C5E86',
+    },
+    footer: {
+      backgroundColor: darkMode ? '#1E1E1E' : '#BDE4E6',
+    },
+    footerIcon: {
+      color: darkMode ? '#E0E0E0' : '#000',
+    },
+    footerLogoButton: {
+      backgroundColor: darkMode ? '#EFF1EC' : '#EFF1EC',
+      borderColor: darkMode ? '#555' : '#BDE4E6',
+    },
+    footerLogo: {
+      backgroundColor: darkMode ? '#EFF1EC' : '#EFF1EC',
+      borderColor: darkMode ? '#555' : '#BDE4E6',
+    },
+    placeholderColor: {
+      color: darkMode ? '#999' : '#aaa',
+    }
+  });
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, dynamicStyles.container]}>
       {/* Encabezado */}
-      <View style={styles.header}>
+      <View style={[styles.header, dynamicStyles.header]}>
         <Image
           source={require("../assets/Synlogo.png")}
-          style={styles.logo}
+          style={[styles.logo, dynamicStyles.logo]}
         />
-        <Text style={styles.headerText}>Soporte</Text>
+        <Text style={[styles.headerText, dynamicStyles.headerText]}>Soporte</Text>
       </View>
 
       <ScrollView>
         {/* Texto de ayuda */}
-        <Text style={styles.question}>¿Cómo podemos ayudarte?</Text>
-        <Text style={styles.instructions}>
+        <Text style={[styles.question, dynamicStyles.question]}>¿Cómo podemos ayudarte?</Text>
+        <Text style={[styles.instructions, dynamicStyles.instructions]}>
           Por favor, describe el problema con tantos detalles como puedas. Nos ayudará a entender mejor qué es lo que ocurre.
         </Text>
 
         {/* Campos del formulario */}
-        <TextInput placeholder="Dirección de correo electrónico" style={styles.input} />
-        <TextInput placeholder="Asunto" style={styles.input} />
-        <View style={styles.pickerContainer}>
+        <TextInput 
+          placeholder="Dirección de correo electrónico" 
+          style={[styles.input, dynamicStyles.input]} 
+          placeholderTextColor={dynamicStyles.placeholderColor.color}
+        />
+        <TextInput 
+          placeholder="Asunto" 
+          style={[styles.input, dynamicStyles.input]} 
+          placeholderTextColor={dynamicStyles.placeholderColor.color}
+        />
+        <View style={[styles.pickerContainer, dynamicStyles.pickerContainer]}>
           <Picker
             selectedValue={problemSelected}
             onValueChange={(itemValue) => {
               setProblemSelected(itemValue);
               console.log(`Área seleccionada: ${itemValue}`);
             }}
-            style={styles.picker}
+            style={[styles.picker, dynamicStyles.picker]}
+            dropdownIconColor={darkMode ? '#BDE4E6' : '#666'}
           >
             {problems.map((problem, index) => (
-              <Picker.Item key={index} label={problem} value={problem} />
+              <Picker.Item 
+                key={index} 
+                label={problem} 
+                value={problem} 
+                color={darkMode ? (problem === problems[0] ? '#999' : '#E0E0E0') : '#000'}
+              />
             ))}
           </Picker>
         </View>
         <TextInput
           placeholder="Descripción"
-          style={[styles.input, { height: 100 }]}
+          style={[styles.input, dynamicStyles.input, { height: 100 }]}
           multiline
+          placeholderTextColor={dynamicStyles.placeholderColor.color}
         />
 
         {/* Botón para agregar fotos */}
-        <TouchableOpacity style={styles.fileButton} onPress={handlePickImage}>
-          <Text style={styles.fileButtonText}>
+        <TouchableOpacity 
+          style={[styles.fileButton, dynamicStyles.fileButton]} 
+          onPress={handlePickImage}
+        >
+          <Text style={[styles.fileButtonText, dynamicStyles.fileButtonText]}>
             {selectedImage ? "Foto seleccionada" : "Agregar foto (opcional)"}
           </Text>
         </TouchableOpacity>
@@ -101,7 +182,7 @@ export default function Support({ navigation }) {
 
         {/* Botón para enviar */}
         <TouchableOpacity
-          style={styles.sendButton}
+          style={[styles.sendButton, dynamicStyles.sendButton]}
           onPress={() =>
             Alert.alert(
               "Mensaje enviado",
@@ -115,35 +196,58 @@ export default function Support({ navigation }) {
       </ScrollView>
 
       {/* Footer */}
-      <View style={styles.footer}>
-        <TouchableOpacity onPress={() => navigation.navigate("Syllabus")} style={styles.footerIcon1}>
-          <Ionicons name="calendar" size={24} color="#000" />
+      <View style={[styles.footer, dynamicStyles.footer]}>
+        <TouchableOpacity 
+          onPress={() => navigation.navigate("Syllabus")} 
+          style={styles.footerIcon1}
+        >
+          <Ionicons 
+            name="calendar" 
+            size={24} 
+            color={dynamicStyles.footerIcon.color} 
+          />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("Progress")} style={styles.footerIcon2}>
-          <Ionicons name="stats-chart" size={24} color="#000" />
+        <TouchableOpacity 
+          onPress={() => navigation.navigate("Progress")} 
+          style={styles.footerIcon2}
+        >
+          <Ionicons 
+            name="stats-chart" 
+            size={24} 
+            color={dynamicStyles.footerIcon.color} 
+          />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigation.navigate("Home")}
-          style={styles.footerLogoButton}
+          style={[styles.footerLogoButton, dynamicStyles.footerLogoButton]}
         >
           <Image
             source={require("../assets/Synlogo.png")}
-            style={styles.footerLogo}
+            style={[styles.footerLogo, dynamicStyles.footerLogo]}
           />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigation.navigate("ChatBot")}
           style={styles.footerIcon3}
         >
-          <Ionicons name="chatbubble-ellipses" size={24} color="#000" />
+          <Ionicons 
+            name="chatbubble-ellipses" 
+            size={24} 
+            color={dynamicStyles.footerIcon.color} 
+          />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigation.navigate("User")}
           style={styles.footerIcon4}
         >
-          <Ionicons name="person-circle" size={26} color="#000" />
+          <Ionicons 
+            name="person-circle" 
+            size={26} 
+            color={dynamicStyles.footerIcon.color} 
+          />
         </TouchableOpacity>
       </View>
+      <StatusBar style={darkMode ? "light" : "dark"} />
     </View>
   );
 }
@@ -186,21 +290,32 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 20,
     bottom: 10,
+    width: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   footerIcon2: {
     position: "absolute",
     left: 100,
     bottom: 10,
+    width: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   footerIcon3: {
     position: "absolute",
     right: 100,
     bottom: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   footerIcon4: {
     position: "absolute",
     right: 20,
     bottom: 10,
+    width: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   footerLogo: {
     width: 80,
