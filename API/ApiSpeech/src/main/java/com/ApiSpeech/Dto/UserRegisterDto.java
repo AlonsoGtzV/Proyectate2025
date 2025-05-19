@@ -1,5 +1,12 @@
 package com.ApiSpeech.Dto;
 
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import java.util.List;
+
 public class UserRegisterDto {
     private String username;
     private String password;
@@ -8,7 +15,10 @@ public class UserRegisterDto {
     private String englishLevel;
     private String languagePreference;
     private String specificArea;
-    private String professionalismLevel;
+    private Integer keys;
+
+    @ElementCollection
+    private List<Integer> unlockedUnits;
 
     public String getUsername() {
         return username;
@@ -58,12 +68,19 @@ public class UserRegisterDto {
         this.specificArea = specificArea;
     }
 
-    public String getProfessionalismLevel() {
-        return professionalismLevel;
+    public Integer getKeys() {
+        return keys;
     }
 
-    public void setProfessionalismLevel(String professionalismLevel) {
-        this.professionalismLevel = professionalismLevel;
+    public void setKeys(Integer keys) {
+        this.keys = keys;
+    }
+    public List<Integer> getUnlockedUnits() {
+        return unlockedUnits;
+    }
+
+    public void setUnlockedUnits(List<Integer> unlockedUnits) {
+        this.unlockedUnits = unlockedUnits;
     }
 
 }

@@ -1,50 +1,83 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import { Picker } from '@react-native-picker/picker'; // Asegúrate de instalar esta dependencia
+import { Picker } from '@react-native-picker/picker';
+import { useTheme } from './ThemeContext'; // Asegúrate de tener este contexto
 
 const specialties = [
   "Software",
-  "Bases de datos",
-  "Ciencias de la Computación",
-  "Redes y Comunicación",
-  "Big Data",
-  "Ciberseguridad",
-  "Cloud",
-  "IA",
+  "Electrónica",
 ];
 
 export default function SpecialtySelectionScreen({ navigation }) {
   const [selectedSpecialty, setSelectedSpecialty] = useState(specialties[0]);
+  const { darkMode } = useTheme();
+
+  const dynamicStyles = StyleSheet.create({
+    container: {
+      backgroundColor: darkMode ? '#121212' : '#f1f3ee',
+    },
+    progressBarBackground: {
+      backgroundColor: darkMode ? '#555' : '#ccc',
+    },
+    progressBarFill: {
+      backgroundColor: darkMode ? '#2C5E86' : '#2b64a1',
+    },
+    progressText: {
+      color: darkMode ? '#83D8E1' : '#2b64a1',
+    },
+    messageBox: {
+      backgroundColor: darkMode ? '#333' : '#fff',
+      borderColor: darkMode ? '#555' : '#000',
+    },
+    messageText: {
+      color: darkMode ? '#E0E0E0' : '#333',
+    },
+    pickerContainer: {
+      backgroundColor: darkMode ? '#222' : '#fff',
+      borderColor: darkMode ? '#555' : '#ccc',
+    },
+    picker: {
+      color: darkMode ? '#E0E0E0' : '#333',
+      backgroundColor: darkMode ? '#222' : '#fff',
+    },
+    continueButton: {
+      backgroundColor: darkMode ? '#2C5E86' : '#2b64a1',
+    },
+    continueText: {
+      color: '#fff',
+    }
+  });
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, dynamicStyles.container]}>
       <View style={styles.progressBarContainer}>
-        <View style={styles.progressBarBackground}>
-          <View style={styles.progressBarFill} />
+        <View style={[styles.progressBarBackground, dynamicStyles.progressBarBackground]}>
+          <View style={[styles.progressBarFill, dynamicStyles.progressBarFill, {width: "33%"}]} />
         </View>
-        <Text style={styles.progressText}>10% completado</Text>
+        <Text style={[styles.progressText, dynamicStyles.progressText]}>33% completado</Text>
       </View>
 
       <View style={styles.dialogContainer}>
         <Image
-          source={require('../assets/Synlogo.png')} // Coloca tu imagen en /assets
+          source={require('../assets/Synlogo.png')}
           style={styles.avatar}
         />
-        <View style={styles.messageBox}>
-          <Text style={styles.messageText}>
+        <View style={[styles.messageBox, dynamicStyles.messageBox]}>
+          <Text style={[styles.messageText, dynamicStyles.messageText]}>
             Empecemos con algunas preguntas, ¿A qué área te vas a dedicar?
           </Text>
         </View>
       </View>
 
-      <View style={styles.pickerContainer}>
+      <View style={[styles.pickerContainer, dynamicStyles.pickerContainer]}>
         <Picker
           selectedValue={selectedSpecialty}
           onValueChange={(itemValue) => {
             setSelectedSpecialty(itemValue);
             console.log(`Área seleccionada: ${itemValue}`);
           }}
-          style={styles.picker}
+          style={[styles.picker, dynamicStyles.picker]}
+          dropdownIconColor={darkMode ? '#BDE4E6' : '#666'}
         >
           {specialties.map((specialty, index) => (
             <Picker.Item key={index} label={specialty} value={specialty} />
@@ -53,14 +86,14 @@ export default function SpecialtySelectionScreen({ navigation }) {
       </View>
 
       <TouchableOpacity
-        style={styles.continueButton}
+        style={[styles.continueButton, dynamicStyles.continueButton]}
         onPress={() => { 
           if(selectedSpecialty){
-            navigation.navigate("Home");
+            navigation.navigate("Level");
           } 
         }}
       >
-        <Text style={styles.continueText}>Continuar</Text>
+        <Text style={[styles.continueText, dynamicStyles.continueText]}>Continuar</Text>
       </TouchableOpacity>
     </View>
   );

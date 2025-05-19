@@ -34,8 +34,9 @@ spring:
 
 aws:
   cognito:
-    userPoolId: us-east-1_9K4qyEk4E
-    clientId: 2fkd1v6vjah67ngqi1qdb8u7fe
+    userPoolId: us-east-1_czPnvGGWd
+    clientId: 4aruvisqmaoigb217hij76aju5
+    clientSecret: 1l0bf8ccp78namk5u5l2b7fbqrquerra4hqi915mirb3alv13a6n
 
 springdoc:
   swagger-ui:

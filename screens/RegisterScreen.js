@@ -14,6 +14,7 @@ export default function RegisterScreen() {
   const [repeatPassword, setRepeatPassword] = useState('');
   const [birthday, setBirthday] = useState('');
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
 
   const navigation = useNavigation(); // Hook para la navegación
 
@@ -24,7 +25,31 @@ export default function RegisterScreen() {
     hideDatePicker();
   };
 
+  const validatePassword = (value) => {
+  const lengthValid = value.length >= 8 && value.length <= 16;
+  const hasUppercase = /[A-Z]/.test(value);
+  const hasSymbol = /[^A-Za-z0-9]/.test(value);
+
+  return { lengthValid, hasUppercase, hasSymbol };
+  };
+
+  const requirements = validatePassword(password);
+
+
   const handleSignUp = () => {
+    const { lengthValid, hasUppercase, hasSymbol } = validatePassword(password);
+
+  if (!lengthValid || !hasUppercase || !hasSymbol) {
+    setPasswordError('Tu contraseña no cumple con los requisitos.');
+    return;
+  }
+
+  if (password !== repeatPassword) {
+    setPasswordError('Las contraseñas no coinciden.');
+    return;
+  }
+
+  setPasswordError('');
     console.log({ username, email, password, repeatPassword, birthday });
     Alert.alert("Registro exitoso", "¡Bienvenido a SynSpeech!");
     navigation.navigate("Login"); // Navegar a la pantalla de inicio de sesión después del registro
@@ -94,6 +119,37 @@ export default function RegisterScreen() {
         value={password}
         onChangeText={setPassword}
       />
+
+      <View style={styles.requirementsContainer}>
+        <Text
+          style={[
+            styles.requirementText,
+            { color: requirements.lengthValid ? "green" : "red" }
+          ]}
+        >
+          • Entre 8 y 16 caracteres
+        </Text>
+        <Text
+          style={[
+            styles.requirementText,
+            { color: requirements.hasUppercase ? "green" : "red" }
+          ]}
+        >
+          • Al menos una letra mayúscula
+        </Text>
+        <Text
+          style={[
+            styles.requirementText,
+            { color: requirements.hasSymbol ? "green" : "red" }
+          ]}
+        >
+          • Al menos un símbolo
+        </Text>
+      </View>
+
+      {passwordError !== '' && (
+        <Text style={styles.errorText}>{passwordError}</Text>
+      )}
 
       <TextInput
         style={[styles.input, dynamicStyles.input]}
@@ -180,5 +236,19 @@ const styles = StyleSheet.create({
   },
   loginLink: {
     fontWeight: "bold",
+  },
+  requirementsContainer: {
+    marginBottom: 10,
+    alignSelf: 'flex-start',
+  },
+  requirementText: {
+    fontSize: 12,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginBottom: 10,
+    textAlign: 'left',
+    width: '100%',
   },
 });

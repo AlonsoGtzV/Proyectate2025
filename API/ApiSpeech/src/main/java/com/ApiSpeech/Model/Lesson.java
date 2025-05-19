@@ -14,7 +14,7 @@ package com.ApiSpeech.Model;
                 private String englishLevel;
                 private String languagePreference;
                 private String specificArea;
-                private String professionalismLevel;
+                private Integer unit; // Nuevo campo
 
                 @DynamoDbPartitionKey
                 public String getId() {
@@ -65,12 +65,12 @@ package com.ApiSpeech.Model;
                     this.specificArea = specificArea;
                 }
 
-                public String getProfessionalismLevel() {
-                    return professionalismLevel;
+                public Integer getUnit() {
+                    return unit;
                 }
 
-                public void setProfessionalismLevel(String professionalismLevel) {
-                    this.professionalismLevel = professionalismLevel;
+                public void setUnit(Integer unit) {
+                    this.unit = unit;
                 }
 
                 @DynamoDbBean

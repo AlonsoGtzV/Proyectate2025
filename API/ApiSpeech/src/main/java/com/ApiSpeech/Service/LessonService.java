@@ -11,4 +11,5 @@ public interface LessonService {
     List<Lesson> getByFilters(String englishLevel, String languagePreference, String specificArea, String professionalismLevel);
     Lesson update(Lesson lesson);
     void delete(Long id);
+    List<Lesson.Test> getQuestionsByUnit(int unit, String englishLevel, String languagePreference, String specificArea);
 }
