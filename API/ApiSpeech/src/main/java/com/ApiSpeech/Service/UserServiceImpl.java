@@ -13,9 +13,13 @@ import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Base64;
 
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -32,6 +36,9 @@ public class UserServiceImpl implements UserService {
     @Value("${aws.cognito.clientId}")
     private String clientId;
 
+    @Value("${aws.cognito.clientSecret}")
+    private String clientSecret;
+
     private final CognitoIdentityProviderClient cognitoClient;
 
     public UserServiceImpl() {
@@ -41,14 +48,27 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    private String calculateSecretHash(String username) {
+        try {
+            String message = username + clientId;
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(clientSecret.getBytes(), "HmacSHA256"));
+            return Base64.getEncoder().encodeToString(mac.doFinal(message.getBytes()));
+        } catch (Exception e) {
+            throw new RuntimeException("Error al calcular el SECRET_HASH", e);
+        }
+    }
+
     @Override
     public Users register(UserRegisterDto dto) {
-        // 1. Registro en Cognito
+        String secretHash = calculateSecretHash(dto.getUsername());
+
         SignUpRequest signUpRequest = SignUpRequest.builder()
                 .clientId(clientId)
                 .username(dto.getUsername())
                 .password(dto.getPassword())
                 .userAttributes(AttributeType.builder().name("email").value(dto.getEmail()).build())
+                .secretHash(secretHash) // Añadir el SECRET_HASH
                 .build();
 
         try {
@@ -64,13 +84,14 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Error en Cognito: " + e.awsErrorDetails().errorMessage());
         }
 
-        // 2. Guardar configuración adicional en RDS
+        // Guardar en la base de datos
         Users user = new Users();
         user.setCognitoUsername(dto.getUsername());
         user.setEnglishLevel(dto.getEnglishLevel());
         user.setLanguagePreference(dto.getLanguagePreference());
         user.setSpecificArea(dto.getSpecificArea());
-        user.setProfessionalismLevel(dto.getProfessionalismLevel());
+        user.setKeys(0); // Inicializar con 0 llaves
+        user.setUnlockedUnits(List.of(1));
 
         return userRepository.save(user);
     }
@@ -121,9 +142,74 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new UserNotFoundException("Usuario con ID " + id + " no encontrado.");
+        // Verificar si el usuario existe en la base de datos
+        Users user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Usuario con ID " + id + " no encontrado."));
+
+        // Eliminar el usuario de Cognito
+        try {
+            AdminDeleteUserRequest deleteRequest = AdminDeleteUserRequest.builder()
+                    .userPoolId(userPoolId)
+                    .username(user.getCognitoUsername())
+                    .build();
+            cognitoClient.adminDeleteUser(deleteRequest);
+        } catch (CognitoIdentityProviderException e) {
+            throw new RuntimeException("Error al eliminar el usuario de Cognito: " + e.awsErrorDetails().errorMessage());
         }
+
+        // Eliminar el usuario de la base de datos
         userRepository.deleteById(id);
+
+        // Reiniciar la secuencia del ID (opcional, solo si es necesario)
+        userRepository.resetIdSequence();
+    }
+
+    @Override
+    public Users addKey(Long id) {
+        Users user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Usuario con ID " + id + " no encontrado."));
+        user.setKeys(user.getKeys() + 1);
+        return userRepository.save(user);
+    }
+
+    @Override
+    public Users unlockUnit(Long id, Integer unitId) {
+        Users user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Usuario con ID " + id + " no encontrado."));
+        if (user.getKeys() == null || user.getKeys() < 1) {
+            throw new RuntimeException("No hay suficientes llaves para desbloquear la unidad.");
+        }
+        if (!user.getUnlockedUnits().contains(unitId)) {
+            user.getUnlockedUnits().add(unitId);
+            user.setKeys(user.getKeys() - 1);
+        }
+        return userRepository.save(user);
+    }
+    @Override
+    public Users updateCognitoAttributes(Long id, String newEmail) {
+        Users user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Usuario con ID " + id + " no encontrado."));
+
+        if (newEmail == null) {
+            throw new RuntimeException("No se proporcionaron atributos para actualizar.");
+        }
+
+        try {
+            AdminUpdateUserAttributesRequest updateRequest = AdminUpdateUserAttributesRequest.builder()
+                    .userPoolId(userPoolId)
+                    .username(user.getCognitoUsername())
+                    .userAttributes(List.of(
+                            AttributeType.builder().name("email").value(newEmail).build()
+                    ))
+                    .build();
+
+            cognitoClient.adminUpdateUserAttributes(updateRequest);
+
+            user.setEmail(newEmail);
+            return userRepository.save(user);
+
+        } catch (CognitoIdentityProviderException e) {
+            throw new RuntimeException("Error al actualizar atributos en Cognito: " + e.awsErrorDetails().errorMessage());
+        }
     }
 }

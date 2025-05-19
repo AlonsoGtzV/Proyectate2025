@@ -1,32 +1,44 @@
 import { StatusBar } from "expo-status-bar";
-import React from "react";
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
-  ScrollView, 
-  Image, 
-  TextInput, 
-  Switch 
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  TextInput,
+  Switch,
+  Modal,
+  ActivityIndicator
 } from "react-native";
+import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from "@expo/vector-icons";
 import { useTutorial } from "./TutorialContext";
 import { useTheme } from "./ThemeContext";
+import { useLanguage } from "./LanguageContext";
 
-export default function Screen({ navigation }) {
+export default function UserScreen({ navigation }) {
   const { resetTutorial } = useTutorial();
   const { darkMode, toggleTheme } = useTheme();
+  const { language, setLanguage, translate, isLoading } = useLanguage();
+
+  const [englishLevel, setEnglishLevel] = useState('');
+  const [isLanguageModalVisible, setLanguageModalVisible] = useState(false);
 
   const handleTutorialPress = async () => {
     await resetTutorial();
     navigation.navigate("Home");
   };
 
-  // Estilos dinámicos completos
+  const handleLanguageChange = (lang) => {
+    setLanguage(lang);
+    setLanguageModalVisible(false);
+  };
+
   const dynamicStyles = StyleSheet.create({
     container: {
-      backgroundColor: darkMode ? '#121212' : '#EFF0EB',
+      backgroundColor: darkMode ? '#121212' : '#EFF1EB',
     },
     header: {
       backgroundColor: darkMode ? '#1E1E1E' : '#2C5E86',
@@ -69,78 +81,128 @@ export default function Screen({ navigation }) {
     },
     footerLogo: {
       borderColor: darkMode ? '#555' : '#BDE4E6',
-    }
+    },
   });
+
+  const modalStyles = StyleSheet.create({
+    modalContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "rgba(0,0,0,0.5)",
+    },
+    modalContent: {
+      backgroundColor: darkMode ? '#333' : '#fff',
+      padding: 20,
+      borderRadius: 10,
+      width: "80%",
+      alignItems: "center",
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      marginBottom: 20,
+      color: darkMode ? '#E0E0E0' : '#333',
+    },
+    modalOption: {
+      fontSize: 16,
+      marginVertical: 10,
+      color: darkMode ? '#E0E0E0' : '#333',
+    },
+    modalCancel: {
+      marginTop: 20,
+      color: darkMode ? '#ff6b6b' : 'red',
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, dynamicStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={darkMode ? '#BDE4E6' : '#2C5E86'} />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, dynamicStyles.container]}>
-      {/* Encabezado */}
       <View style={[styles.header, dynamicStyles.header]}>
         <Image
           source={require("../assets/Synlogo.png")}
-          style={[styles.logo, { 
-            backgroundColor: darkMode ? '#EFF1EC' : '#EFF1EC' 
-          }]}
+          style={[styles.logo, { backgroundColor: '#EFF1EC' }]}
         />
-        <Text style={[styles.headerText, dynamicStyles.headerText]}>Perfil</Text>
+        <Text style={[styles.headerText, dynamicStyles.headerText]}>{translate('profile')}</Text>
       </View>
 
       <ScrollView
         style={styles.lessonContainer}
         contentContainerStyle={[styles.scrollContent, dynamicStyles.scrollContent]}
       >
-        {/* Personal Info */}
         <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
-          Información personal
+          {translate('personalInfo')}
         </Text>
         <TextInput 
-          placeholder="Nombre"
+          placeholder={translate('name')}
           placeholderTextColor={dynamicStyles.placeholderText.color}
           style={[styles.input, dynamicStyles.input]} 
         />
         <TextInput 
-          placeholder="Correo electrónico"
+          placeholder={translate('email')}
           placeholderTextColor={dynamicStyles.placeholderText.color}
           style={[styles.input, dynamicStyles.input]} 
         />
 
-        {/* User Settings */}
-        <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
-          Ajustes
+        <Text style={[styles.label, dynamicStyles.label, { marginBottom: 5 }]}>
+          {translate('englishLevel')}
         </Text>
-        <TextInput 
-          placeholder="Idioma de interfaz"
-          placeholderTextColor={dynamicStyles.placeholderText.color}
-          style={[styles.input, dynamicStyles.input]} 
-        />
-        <TextInput 
-          placeholder="Área de interés"
-          placeholderTextColor={dynamicStyles.placeholderText.color}
-          style={[styles.input, dynamicStyles.input]} 
-        />
-
-        {/* Notification Settings */}
-        <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
-          Ajustes de notificaciones
-        </Text>
-        <View style={styles.row}>
-          <Text style={[styles.label, dynamicStyles.label]}>
-            Recordatorios de estudio
-          </Text>
-          <Switch 
-            value={true} 
-            thumbColor={darkMode ? '#2C5E86' : '#f4f3f4'}
-            trackColor={{ false: '#767577', true: darkMode ? '#BDE4E6' : '#81b0ff' }}
-          />
+        <View style={[styles.pickerContainer, dynamicStyles.input]}>
+          <Picker
+            selectedValue={englishLevel}
+            onValueChange={(value) => setEnglishLevel(value)}
+            style={{ color: englishLevel ? dynamicStyles.input.color : dynamicStyles.placeholderText.color }}
+            dropdownIconColor={darkMode ? '#BDE4E6' : '#666'}
+          >
+            <Picker.Item 
+              label={translate('selectLevel')} 
+              value="" 
+              enabled={false} 
+            />
+            <Picker.Item label={translate('a1')} value="A1" />
+            <Picker.Item label={translate('a2')} value="A2" />
+            <Picker.Item label={translate('b1')} value="B1" />
+            <Picker.Item label={translate('b2')} value="B2" />
+            <Picker.Item label={translate('c1')} value="C1" />
+            <Picker.Item label={translate('c2')} value="C2" />
+          </Picker>
         </View>
 
-        {/* Visualization Settings */}
         <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
-          Ajustes de visualización
+          {translate('settings')}
+        </Text>
+
+        <Text style={[styles.label, dynamicStyles.label, { marginBottom: 5 }]}>
+          {translate('interfaceLanguage')}
+        </Text>
+        <TouchableOpacity
+          style={[styles.input, dynamicStyles.input, { justifyContent: "center" }]}
+          onPress={() => setLanguageModalVisible(true)}
+        >
+          <Text style={{ color: dynamicStyles.input.color }}>
+            {language === "es" ? translate('spanish') : translate('english')}
+          </Text>
+        </TouchableOpacity>
+
+        <TextInput 
+          placeholder={translate('interestArea')}
+          placeholderTextColor={dynamicStyles.placeholderText.color}
+          style={[styles.input, dynamicStyles.input]} 
+        />
+
+        <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
+          {translate('displaySettings')}
         </Text>
         <View style={styles.row}>
           <Text style={[styles.label, dynamicStyles.label]}>
-            Modo Oscuro
+            {translate('darkMode')}
           </Text>
           <Switch 
             value={darkMode} 
@@ -150,16 +212,15 @@ export default function Screen({ navigation }) {
           />
         </View>
 
-        {/* Buttons */}
         <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
-          Ayuda y Soporte
+          {translate('helpSupport')}
         </Text>
         <TouchableOpacity 
           style={[styles.button, dynamicStyles.button]} 
           onPress={handleTutorialPress}
         >
           <Text style={[styles.buttonText, dynamicStyles.buttonText]}>
-            Tutorial
+            {translate('tutorial')}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -167,12 +228,33 @@ export default function Screen({ navigation }) {
           onPress={() => navigation.navigate("Support")}
         >
           <Text style={[styles.buttonText, dynamicStyles.buttonText]}>
-            Soporte
+            {translate('support')}
           </Text>
         </TouchableOpacity>
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isLanguageModalVisible}
+          onRequestClose={() => setLanguageModalVisible(false)}
+        >
+          <View style={modalStyles.modalContainer}>
+            <View style={modalStyles.modalContent}>
+              <Text style={modalStyles.modalTitle}>{translate('selectLanguage')}</Text>
+              <TouchableOpacity onPress={() => handleLanguageChange("es")}>
+                <Text style={modalStyles.modalOption}>{translate('spanish')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleLanguageChange("en")}>
+                <Text style={modalStyles.modalOption}>{translate('english')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setLanguageModalVisible(false)}>
+                <Text style={modalStyles.modalCancel}>{translate('cancel')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
 
-      {/* Footer */}
       <View style={[styles.footer, dynamicStyles.footer]}>
         <TouchableOpacity
           onPress={() => navigation.navigate("Syllabus")}
@@ -229,7 +311,6 @@ export default function Screen({ navigation }) {
   );
 }
 
-// Estilos base (sin colores fijos para permitir sobreescritura)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -328,6 +409,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
+    fontWeight: "bold",
   },
   button: {
     padding: 12,
@@ -337,5 +419,11 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontWeight: "bold",
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderRadius: 6,
+    marginBottom: 10,
+    justifyContent: 'center',
   },
 });

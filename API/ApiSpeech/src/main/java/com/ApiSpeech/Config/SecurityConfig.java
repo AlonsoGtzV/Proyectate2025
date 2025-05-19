@@ -23,13 +23,18 @@ public class SecurityConfig {
                                 "/api/users/login",
                                 "/api/users",
                                 "/api/users/{id}",
+                                "/api/users/{id}/add-key",
+                                "/api/users/{id}/unlock-unit/{unitId}",
+                                "/api/users/{id}/update-partial",
                                 "/api/lessons/create",
                                 "/api/lessons/update",
                                 "/api/lessons/delete",
                                 "/api/lessons",
                                 "/api/lessons/{id}",
+                                "/api/lessons/questions/unit/**",
                                 "/swagger-ui/**",     // Permite Swagger UI
-                                "/v3/api-docs/**"     // Permite la documentación OpenAPI
+                                "/v3/api-docs/**",
+                                "/error"// Permite la documentación OpenAPI
                         ).permitAll()             // Sin autenticación
                         .anyRequest().authenticated()  // Resto de endpoints protegidos
                 )

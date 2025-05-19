@@ -40,14 +40,14 @@ public class LessonRepository {
         return findById(id).isPresent();
     }
 
-    public List<Lesson> findByFilters(String englishLevel, String languagePreference, String specificArea, String professionalismLevel) {
+    public List<Lesson> findByFilters(String englishLevel, String languagePreference, String specificArea, String unit) {
         return lessonTable.scan()
                 .items()
                 .stream()
                 .filter(lesson -> (englishLevel == null || englishLevel.equals(lesson.getEnglishLevel())) &&
                         (languagePreference == null || languagePreference.equals(lesson.getLanguagePreference())) &&
                         (specificArea == null || specificArea.equals(lesson.getSpecificArea())) &&
-                        (professionalismLevel == null || professionalismLevel.equals(lesson.getProfessionalismLevel())))
+                        (unit == null || unit.equals(lesson.getUnit())))
                 .collect(Collectors.toList());
     }
     public void deleteById(String id) {

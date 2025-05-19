@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
-const styles = StyleSheet.create({
+
+export default StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#EFF1EC",
@@ -21,6 +22,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     width: "100%",
+    marginBottom: 20,
   },
   inputWrapper: {
     flexDirection: "row",
@@ -28,34 +30,34 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 8,
+    borderRadius: 5,
     paddingHorizontal: 10,
-    marginVertical: 8,
-    width: "100%",
+    marginBottom: 15,
+  },
+  input: {
+    flex: 1,
+    height: 50,
+    fontSize: 16,
+    color: "#333",
   },
   icon: {
     marginRight: 10,
   },
   iconRight: {
-    marginLeft: "auto",
-  },
-  input: {
-    flex: 1,
-    paddingVertical: 12,
+    marginLeft: 10,
   },
   forgotPassword: {
+    alignSelf: "flex-end",
     color: "#007BFF",
-    marginTop: 5,
+    marginBottom: 20,
     fontSize: 14,
-    marginLeft: "50%",
   },
   loginButton: {
-    backgroundColor: "#1E3A8A",
-    paddingVertical: 12,
+    backgroundColor: "#2E5984",
+    padding: 15,
     borderRadius: 8,
-    width: "100%",
     alignItems: "center",
-    marginTop: 10,
+    width: "100%",
   },
   loginButtonText: {
     color: "#fff",
@@ -65,7 +67,7 @@ const styles = StyleSheet.create({
   separatorContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 10,
+    marginVertical: 20,
   },
   separatorLine: {
     flex: 1,
@@ -74,57 +76,98 @@ const styles = StyleSheet.create({
   },
   separatorText: {
     marginHorizontal: 10,
-    fontSize: 16,
-    color: "#666",
+    color: "#333",
   },
   socialButtonGoogle: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#ccc",
-    paddingVertical: 10,
+    padding: 12,
     borderRadius: 8,
     width: "100%",
     marginBottom: 10,
+    backgroundColor: "#fff",
   },
   socialButtonApple: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#000",
-    paddingVertical: 10,
+    padding: 12,
     borderRadius: 8,
     width: "100%",
-    marginBottom: 10,
+    marginBottom: 20,
   },
   socialIcon: {
     width: 20,
     height: 20,
     marginRight: 10,
-    marginLeft: 10,
   },
   socialButtonText: {
-    flex: 1,
-    textAlign: "center",
     fontSize: 16,
     color: "#000",
   },
   socialButtonappleText: {
-    flex: 1,
-    textAlign: "center",
     fontSize: 16,
     color: "#fff",
   },
   registerText: {
-    marginTop: 15,
     fontSize: 14,
     color: "#333",
   },
   registeruser: {
-    color: "#007BFF",
-    marginTop: 5,
     fontSize: 14,
+    color: "#007BFF",
+    fontWeight: "bold",
+    marginTop: 5,
+  },
+
+  // Estilos para RegisterScreen
+  birthdayLabel: {
+    alignSelf: "flex-start",
+    marginBottom: 5,
+    color: "#333",
+    fontSize: 14,
+  },
+  birthdayInputContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+    width: "100%",
+  },
+  birthdayInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    height: 40,
+    textAlign: "center",
+    marginHorizontal: 5,
+    backgroundColor: "#fff",
+  },
+  signupButton: {
+    backgroundColor: "#2E5984",
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    width: "100%",
+    marginBottom: 20,
+  },
+  signupButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  loginRedirectText: {
+    fontSize: 14,
+    color: "#333",
+  },
+  loginLink: {
+    fontSize: 14,
+    color: "#007BFF",
+    fontWeight: "bold",
+    marginTop: 5,
   },
 });
 
-export default styles;

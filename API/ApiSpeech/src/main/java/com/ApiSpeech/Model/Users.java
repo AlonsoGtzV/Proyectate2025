@@ -1,9 +1,11 @@
 package com.ApiSpeech.Model;
 
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.util.List;
 
 @Entity
 public class Users {
@@ -13,11 +15,15 @@ public class Users {
     private Long id;
 
     private String cognitoUsername; // ID del usuario en Cognito
-
+    private String email; // Agregar el atributo email
     private String englishLevel;
     private String languagePreference;
     private String specificArea;
-    private String professionalismLevel;
+
+    private Integer keys;
+
+    @ElementCollection
+    private List<Integer> unlockedUnits;
 
     // Getters y setters
 
@@ -35,6 +41,14 @@ public class Users {
 
     public void setCognitoUsername(String cognitoUsername) {
         this.cognitoUsername = cognitoUsername;
+    }
+
+    public String getEmail() { // Getter para email
+        return email;
+    }
+
+    public void setEmail(String email) { // Setter para email
+        this.email = email;
     }
 
     public String getEnglishLevel() {
@@ -61,11 +75,19 @@ public class Users {
         this.specificArea = specificArea;
     }
 
-    public String getProfessionalismLevel() {
-        return professionalismLevel;
+    public Integer getKeys() {
+        return keys;
     }
 
-    public void setProfessionalismLevel(String professionalismLevel) {
-        this.professionalismLevel = professionalismLevel;
+    public void setKeys(Integer keys) {
+        this.keys = keys;
+    }
+
+    public List<Integer> getUnlockedUnits() {
+        return unlockedUnits;
+    }
+
+    public void setUnlockedUnits(List<Integer> unlockedUnits) {
+        this.unlockedUnits = unlockedUnits;
     }
 }

@@ -48,4 +48,13 @@ public class LessonController {
     public void delete(@PathVariable Long id) {
         lessonService.delete(id);
     }
+
+    @GetMapping("/questions/unit/{unit}")
+    public List<Lesson.Test> getQuestionsByUnit(
+            @PathVariable int unit,
+            @RequestParam(required = false) String englishLevel,
+            @RequestParam(required = false) String languagePreference,
+            @RequestParam(required = false) String specificArea) {
+        return lessonService.getQuestionsByUnit(unit, englishLevel, languagePreference, specificArea);
+    }
 }

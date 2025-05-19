@@ -23,7 +23,6 @@ dependencies {
     implementation platform("software.amazon.awssdk:bom:2.25.6")
     implementation 'software.amazon.awssdk:cognitoidentityprovider'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
     runtimeOnly 'org.postgresql:postgresql'

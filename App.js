@@ -12,12 +12,15 @@ import Support from "./screens/Support";
 import Syllabus from "./screens/Syllabus";
 import ProgressScreen from "./screens/ProgressScreen";
 import { TutorialProvider } from "./screens/TutorialContext";
-import { ThemeProvider } from "./screens/ThemeContext"; // Importar el ThemeProvider
+import { ThemeProvider } from "./screens/ThemeContext"; 
+import { LanguageProvider } from "./screens/LanguageContext";
+import EnglishLevelSelection from "./screens/EnglishLevelSelection";
 
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
+    <LanguageProvider>
     <ThemeProvider>
     <TutorialProvider>
       <NavigationContainer>
@@ -27,6 +30,7 @@ export default function App() {
           <Stack.Screen name="Register" component={RegisterScreen} />
           <Stack.Screen name="LanguageSelection" component={LanguageSelectionScreen} />
           <Stack.Screen name="SpecialtySelection" component={SpecialtySelectionScreen} />
+          <Stack.Screen name="Level" component={EnglishLevelSelection} />
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="User" component={UserScreen} />
           <Stack.Screen name="ChatBot" component={ChatBot} />
@@ -37,5 +41,6 @@ export default function App() {
       </NavigationContainer>
     </TutorialProvider>
     </ThemeProvider>
+    </LanguageProvider>
   );
 }

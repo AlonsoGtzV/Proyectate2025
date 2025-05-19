@@ -1,26 +1,65 @@
 // screens/LanguageSelectionScreen.jsx
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { useTheme } from './ThemeContext'; // Asegúrate de tener este contexto
 
 export default function LanguageSelectionScreen({ navigation }) {
   const [selectedLanguage, setSelectedLanguage] = useState(null);
+  const { darkMode } = useTheme();
+
+  const dynamicStyles = StyleSheet.create({
+    container: {
+      backgroundColor: darkMode ? '#121212' : '#f1f3ee',
+    },
+    progressBarBackground: {
+      backgroundColor: darkMode ? '#555' : '#ccc',
+    },
+    progressBarFill: {
+      backgroundColor: darkMode ? '#2C5E86' : '#2b64a1',
+    },
+    progressText: {
+      color: darkMode ? '#83D8E1' : '#2b64a1',
+    },
+    messageBox: {
+      backgroundColor: darkMode ? '#333' : '#fff',
+      borderColor: darkMode ? '#555' : '#000',
+    },
+    messageText: {
+      color: darkMode ? '#E0E0E0' : '#333',
+    },
+    languageButton: {
+      backgroundColor: darkMode ? '#2C5E86' : '#539399',
+    },
+    selectedButton: {
+      borderColor: darkMode ? '#83D8E1' : '#2b64a1',
+    },
+    languageText: {
+      color: darkMode ? '#E0E0E0' : '#e5e9e9',
+    },
+    continueButton: {
+      backgroundColor: darkMode ? '#2C5E86' : '#2b64a1',
+    },
+    continueText: {
+      color: '#fff',
+    }
+  });
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, dynamicStyles.container]}>
       <View style={styles.progressBarContainer}>
-        <View style={styles.progressBarBackground}>
-          <View style={styles.progressBarFill} />
+        <View style={[styles.progressBarBackground, dynamicStyles.progressBarBackground]}>
+          <View style={[styles.progressBarFill, dynamicStyles.progressBarFill]} />
         </View>
-        <Text style={styles.progressText}>0% completado</Text>
+        <Text style={[styles.progressText, dynamicStyles.progressText]}>0% completado</Text>
       </View>
 
       <View style={styles.dialogContainer}>
         <Image
-          source={require('../assets/Synlogo.png')} // Coloca tu imagen en /assets
+          source={require('../assets/Synlogo.png')}
           style={styles.avatar}
         />
-        <View style={styles.messageBox}>
-          <Text style={styles.messageText}>
+        <View style={[styles.messageBox, dynamicStyles.messageBox]}>
+          <Text style={[styles.messageText, dynamicStyles.messageText]}>
             Hola, soy Syn, ¿en qué idioma deseas tener tu aplicación?{"\n"}
             (Puedes cambiar esto después en configuración)
           </Text>
@@ -30,36 +69,39 @@ export default function LanguageSelectionScreen({ navigation }) {
       <TouchableOpacity
         style={[
           styles.languageButton,
-          selectedLanguage === 'es' && styles.selectedButton,
+          dynamicStyles.languageButton,
+          selectedLanguage === 'es' && [styles.selectedButton, dynamicStyles.selectedButton],
         ]}
         onPress={() => setSelectedLanguage('es')}
       >
-        <Text style={styles.languageText}>Español</Text>
+        <Text style={[styles.languageText, dynamicStyles.languageText]}>Español</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={[
           styles.languageButton,
-          selectedLanguage === 'en' && styles.selectedButton,
+          dynamicStyles.languageButton,
+          selectedLanguage === 'en' && [styles.selectedButton, dynamicStyles.selectedButton],
         ]}
         onPress={() => setSelectedLanguage('en')}
       >
-        <Text style={styles.languageText}>Inglés</Text>
+        <Text style={[styles.languageText, dynamicStyles.languageText]}>Inglés</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={[
           styles.continueButton,
+          dynamicStyles.continueButton,
           !selectedLanguage && { opacity: 0.5 },
         ]}
         onPress={() => {
           if (selectedLanguage) {
-            navigation.navigate('SpecialtySelection'); // puedes cambiar esto luego
+            navigation.navigate('SpecialtySelection');
           }
         }}
         disabled={!selectedLanguage}
       >
-        <Text style={styles.continueText}>Continue</Text>
+        <Text style={[styles.continueText, dynamicStyles.continueText]}>Continuar</Text>
       </TouchableOpacity>
     </View>
   );

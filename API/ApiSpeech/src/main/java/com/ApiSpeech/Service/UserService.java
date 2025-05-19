@@ -12,5 +12,8 @@ public interface UserService {
     Users getById(Long id);
     Users update(Users user);
     void delete(Long id);
+    Users addKey(Long id);
+    Users unlockUnit(Long id, Integer unitId);
+    Users updateCognitoAttributes(Long id, String newEmail);
 }
 

@@ -1,22 +1,22 @@
-// screens/LoginScreen.js
 import { StatusBar } from "expo-status-bar";
 import { Text, View, Image, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "./ThemeContext";
 import styles from "../styles/styles";
+import { useState } from "react";
 
 export default function LoginScreen() {
   const navigation = useNavigation();
   const { darkMode } = useTheme();
+  const [showPassword, setShowPassword] = useState(false);
 
-  // Estilos dinámicos basados en el tema
   const dynamicStyles = StyleSheet.create({
     container: {
       backgroundColor: darkMode ? '#121212' : '#EFF1EC',
     },
     header: {
-      backgroundColor: darkMode ? '#121212' : '#2C5E86',
+      backgroundColor: darkMode ? '#121212' : '#EFF1EC',
     },
     inputWrapper: {
       backgroundColor: darkMode ? '#333' : '#fff',
@@ -89,10 +89,16 @@ export default function LoginScreen() {
           <TextInput 
             placeholder="Contraseña" 
             style={[styles.input, dynamicStyles.input]} 
-            secureTextEntry 
+            secureTextEntry={!showPassword}
             placeholderTextColor={dynamicStyles.placeholderColor.color}
           />
-          <FontAwesome name="eye-slash" size={18} style={[styles.iconRight, dynamicStyles.iconRight]} />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <FontAwesome 
+              name={showPassword ? "eye" : "eye-slash"} 
+              size={18} 
+              style={[styles.iconRight, dynamicStyles.iconRight]} 
+            />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -112,16 +118,6 @@ export default function LoginScreen() {
         <Text style={[styles.separatorText, dynamicStyles.separatorText]}>O</Text>
         <View style={[styles.separatorLine, dynamicStyles.separatorLine]} />
       </View>
-
-      <TouchableOpacity style={[styles.socialButtonGoogle, dynamicStyles.socialButtonGoogle]}>
-        <Image source={require("../assets/google.png")} style={styles.socialIcon} />
-        <Text style={[styles.socialButtonText, dynamicStyles.socialButtonText]}>Continuar con Google</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={[styles.socialButtonApple, dynamicStyles.socialButtonApple]}>
-        <Image source={require("../assets/apple.png")} style={styles.socialIcon} />
-        <Text style={[styles.socialButtonappleText, dynamicStyles.socialButtonappleText]}>Continuar con Apple</Text>
-      </TouchableOpacity>
 
       <Text style={[styles.registerText, dynamicStyles.registerText]}>¿Usuario nuevo?</Text>
       <TouchableOpacity onPress={() => navigation.navigate("Register")}>
