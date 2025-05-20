@@ -19,6 +19,11 @@ public class LessonController {
         return lessonService.create(lesson);
     }
 
+    @PostMapping("/bulk")
+    public List<Lesson> createBulk(@RequestBody List<Lesson> lessons) {
+        return lessonService.createBulk(lessons);
+    }
+
     @GetMapping
     public List<Lesson> getAll() {
         return lessonService.getAll();

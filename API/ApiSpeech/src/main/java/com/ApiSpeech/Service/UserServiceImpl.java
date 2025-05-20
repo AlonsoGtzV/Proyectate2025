@@ -98,6 +98,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String login(UserLoginDto dto) {
+        System.out.print(dto.getUsername());
         // 1. Autenticación con Cognito
         try {
             InitiateAuthRequest authRequest = InitiateAuthRequest.builder()
@@ -105,14 +106,16 @@ public class UserServiceImpl implements UserService {
                     .clientId(clientId)
                     .authParameters(Map.of(
                             "USERNAME", dto.getUsername(),
-                            "PASSWORD", dto.getPassword()
+                            "PASSWORD", dto.getPassword(),
+                            "SECRET_HASH", calculateSecretHash(dto.getUsername()) // Añadir el SECRET_HASH
                     ))
                     .build();
 
             cognitoClient.initiateAuth(authRequest);
         } catch (NotAuthorizedException e) {
+            System.err.println("Error de autenticación: " + e.awsErrorDetails().errorMessage());
             throw new RuntimeException("Usuario o contraseña incorrectos.");
-        } catch (UserNotFoundException e) {
+        }catch (UserNotFoundException e) {
             throw new RuntimeException("El usuario no existe.");
         } catch (CognitoIdentityProviderException e) {
             throw new RuntimeException("Error al autenticar con Cognito: " + e.awsErrorDetails().errorMessage());

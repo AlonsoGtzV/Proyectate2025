@@ -16,6 +16,29 @@ export default function RegisterScreen() {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [passwordError, setPasswordError] = useState('');
 
+  const register = async (username, password, email, englishLevel, languagePreference, specificArea) => {
+    try {
+      const response = await fetch('http://localhost:8080/api/users/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username,
+          password,
+          email,
+          englishLevel,
+          languagePreference,
+          specificArea,
+        }),
+      });
+      if (!response.ok) throw new Error('Error en registro');
+      const user = await response.json(); // El backend retorna el usuario creado
+      return user;
+    } catch (error) {
+      console.error(error);
+      // Maneja el error en la UI
+    }
+  };
+
   const navigation = useNavigation(); // Hook para la navegación
 
   const showDatePicker = () => setDatePickerVisibility(true);
