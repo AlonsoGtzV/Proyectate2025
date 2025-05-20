@@ -13,7 +13,12 @@ import {useEffect, useRef} from 'react';
 
 export default function LoginScreen() {
   const navigation = useNavigation();
+  const { translate } = useLanguage();
+  const logoAnim = useRef(new Animated.Value(-100)).current; // empieza arriba
+  const formOpacity = useRef(new Animated.Value(0)).current; // empieza invisible
+  const buttonAnim = useRef(new Animated.Value(100)).current;
   const { darkMode } = useTheme();
+  const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -42,14 +47,6 @@ export default function LoginScreen() {
       Alert.alert('Error', error.message);
     }
   };
-  const { translate } = useLanguage();
-  const logoAnim = useRef(new Animated.Value(-100)).current; // empieza arriba
-const formOpacity = useRef(new Animated.Value(0)).current; // empieza invisible
-const buttonAnim = useRef(new Animated.Value(100)).current; // empieza abajo
-const [email, setEmail] = useState("");
-const [password, setPassword] = useState("");
-
-
 
 useEffect(() => {
   Animated.sequence([
