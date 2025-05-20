@@ -3,39 +3,12 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { useTheme } from './ThemeContext';
 import Slider from '@react-native-community/slider';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function EnglishLevelSelection({ navigation, route }) {
-  const {username, email, password, repeatPassword, specialty} = route.params || {};
+  const {username, email, password, repeatPassword, birthday, specificArea} = route.params || {};
   const [selectedLevel, setSelectedLevel] = useState(null);
   const { darkMode } = useTheme();
-  const handleRegister = async () => {
 
-    console.log(username, email, password, specialty,selectedLevel);
-    try {
-      const response = await fetch('http://10.0.2.2:8080/api/users/register', {
-
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username,
-          password,
-          email,
-          englishLevel: selectedLevel,
-          languagePreference: route.params?.languagePreference || '', // o el valor adecuado
-          specificArea: specialty || '', // o el valor adecuado
-          keys: 0,
-          unlockedUnits: [0]
-        }),
-      });
-      if (!response.ok) throw new Error('Error en registro');
-      const token = await response.text(); // o response.json() según tu backend
-      await AsyncStorage.setItem('token', token);
-      navigation.navigate('Home');
-    } catch (error) {
-      Alert.alert('Error', error.message);
-    }
-  };
   const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
   const levelDescriptions = {
     'A1': 'Principiante',
@@ -143,7 +116,14 @@ export default function EnglishLevelSelection({ navigation, route }) {
           dynamicStyles.continueButton,
           !selectedLevel && { opacity: 0.5 },
         ]}
-        onPress={handleRegister}
+        onPress={() => {
+          if (selectedLevel) {
+            const levelCategory = getLevelCategory(selectedLevel);
+            console.log({ username, email, password, repeatPassword, birthday, specificArea, englishLevel: levelCategory });
+
+            navigation.navigate('Home');
+          }
+        }}
         disabled={!selectedLevel}
       >
         <Text style={styles.continueText}>Continuar</Text>
@@ -152,6 +132,7 @@ export default function EnglishLevelSelection({ navigation, route }) {
   );
 }
 
+// Función para obtener detalles de cada nivel
 function getLevelDetails(level) {
   const details = {
     'A1': 'Puedes entender y usar expresiones cotidianas y frases básicas.',
@@ -162,6 +143,13 @@ function getLevelDetails(level) {
     'C2': 'Puedes expresarte espontáneamente con gran precisión y diferenciar matices.'
   };
   return details[level] || '';
+}
+
+function getLevelCategory(level) {
+  if (level === 'A1' || level === 'A2') return 'Beginner';
+  if (level === 'B1' || level === 'B2') return 'Intermediate';
+  if (level === 'C1' || level === 'C2') return 'Advanced';
+  return '';
 }
 
 const styles = StyleSheet.create({

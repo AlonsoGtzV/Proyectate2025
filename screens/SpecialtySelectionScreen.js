@@ -96,7 +96,7 @@ export default function SpecialtySelectionScreen({ navigation, route }) {
               password,
               repeatPassword,
               birthday,
-              specialty: selectedSpecialty,
+              specificArea: selectedSpecialty,
             });
           } 
         }}
