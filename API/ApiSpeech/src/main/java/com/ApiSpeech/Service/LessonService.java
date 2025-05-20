@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface LessonService {
     Lesson create(Lesson lesson);
+    List<Lesson> createBulk(List<Lesson> lessons);
     List<Lesson> getAll();
     Lesson getById(Long id);
     List<Lesson> getByFilters(String englishLevel, String languagePreference, String specificArea, String professionalismLevel);

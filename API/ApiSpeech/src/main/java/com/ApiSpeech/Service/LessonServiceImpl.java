@@ -24,6 +24,16 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
+    public List<Lesson> createBulk(List<Lesson> lessons) {
+        if (lessons == null || lessons.isEmpty()) {
+            throw new IllegalArgumentException("La lista de lecciones no puede estar vacía.");
+        }
+        return lessons.stream()
+                .map(lessonRepository::save)
+                .toList();
+    }
+
+    @Override
     public Lesson getById(Long id) {
         return lessonRepository.findById(id.toString())
                 .orElseThrow(() -> new LessonNotFoundException("Lección con ID " + id + " no encontrada."));

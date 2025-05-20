@@ -13,7 +13,7 @@ spring:
       client:
         registration:
           cognito:
-            client-id: 2fkd1v6vjah67ngqi1qdb8u7fe
+            client-id: 4aruvisqmaoigb217hij76aju5
             scope:
               - phone
               - openid

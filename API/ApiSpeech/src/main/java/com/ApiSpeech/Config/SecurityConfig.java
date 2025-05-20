@@ -27,6 +27,7 @@ public class SecurityConfig {
                                 "/api/users/{id}/unlock-unit/{unitId}",
                                 "/api/users/{id}/update-partial",
                                 "/api/lessons/create",
+                                "/api/lessons/bulk",
                                 "/api/lessons/update",
                                 "/api/lessons/delete",
                                 "/api/lessons",
