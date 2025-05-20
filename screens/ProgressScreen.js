@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "./ThemeContext";
+import { useLanguage} from "./LanguageContext";
 
 export default function ProgressScreen({ navigation }) {
   const [expandedUnitIndex, setExpandedUnitIndex] = useState(null);
   const {darkMode, toggleTheme} = useTheme();
+  const { translate } = useLanguage();
 
   const dynamicStyles = StyleSheet.create({
       container: {
@@ -58,22 +60,22 @@ lockedText: {
 
     });
 
-  const units = [
+    const units = [
     {
-      title: "Unidad 1. Introducción al inglés técnico",
+      title: translate("unit_1_title"),
       status: "Desbloqueado",
       progress: "50%",
       lessons: [
-        { title: "1.1 - Empecemos con lo básico", progress: "100%" },
-        { title: "1.2 - ¡Leamos un poco!", progress: "100%" },
-        { title: "1.3 - ¿Qué tal si escuchamos algo?", progress: "0%" },
-        { title: "1.4 - Escribiendo... ¡Completado!", progress: "0%" },
-        { title: "1.5 - Hora de ponernos a prueba", progress: "Sin realizar" },
+        { title: translate("lesson_1_1"), progress: "100%" },
+        { title: translate("lesson_1_2"), progress: "100%" },
+        { title: translate("lesson_1_3"), progress: "0%" },
+        { title: translate("lesson_1_4"), progress: "0%" },
+        { title: translate("lesson_1_5"), progress: translate("not_done") },
       ],
     },
     {
-      title: "Unidad 2. De cero a cien en desarrollo de software",
-      status: "Bloqueado",
+      title: translate("locked_unit"),
+      status: translate("blocked_unit"),
       progress: "0%",
       lessons: [],
     },
@@ -87,7 +89,7 @@ lockedText: {
     if (!unit.lessons) return count;
     return (
       count +
-      unit.lessons.filter((lesson) => lesson.progress === "Completado").length
+      unit.lessons.filter((lesson) => lesson.progress === translate("completed")).length
     );
   }, 0);
 
@@ -103,7 +105,7 @@ lockedText: {
     <View style={[styles.unitContainer, dynamicStyles.unitContainer]}>
   <TouchableOpacity onPress={() => toggleExpand(index)} style={styles.unitHeader}>
     <Text style={[styles.unitTitle, dynamicStyles.unitTitle]}>{item.title}</Text>
-    <Text style={[styles.unitProgress, dynamicStyles.unitProgress]}>Progreso: {item.progress}</Text>
+    <Text style={[styles.unitProgress, dynamicStyles.unitProgress]}> {translate("progress")} {item.progress}</Text>
     <Ionicons
       name={expandedUnitIndex === index ? "chevron-up" : "chevron-down"}
       size={20}
@@ -119,7 +121,7 @@ lockedText: {
         />
       )}
       {expandedUnitIndex === index && item.lessons.length === 0 && (
-        <Text style={styles.lockedText}>Contenido bloqueado</Text>
+        <Text style={styles.lockedText}>{translate("content_not_available")}</Text>
       )}
     </View>
   );
@@ -132,7 +134,7 @@ lockedText: {
           source={require("../assets/Synlogo.png")}
           style={[styles.logo, dynamicStyles.logo]}
         />
-        <Text style={styles.headerText}>Progreso</Text>
+        <Text style={styles.headerText}>{translate("progress")}</Text>
         <View style={styles.keyContainer}>
           <Ionicons name="key" size={20} color="white" />
           <Text style={styles.keyText}>x {keysEarned}</Text>

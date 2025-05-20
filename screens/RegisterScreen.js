@@ -4,6 +4,7 @@ import { View, Text, TextInput, TouchableOpacity, Image, ScrollView, StyleSheet,
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from './ThemeContext';
+import { useLanguage } from './LanguageContext';
 
 
 export default function RegisterScreen() {
@@ -15,6 +16,7 @@ export default function RegisterScreen() {
   const [birthday, setBirthday] = useState('');
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [passwordError, setPasswordError] = useState('');
+  const { translate } = useLanguage();
 
   const register = async (username, password, email, englishLevel, languagePreference, specificArea) => {
     try {
@@ -63,19 +65,23 @@ export default function RegisterScreen() {
     const { lengthValid, hasUppercase, hasSymbol } = validatePassword(password);
 
   if (!lengthValid || !hasUppercase || !hasSymbol) {
-    setPasswordError('Tu contraseña no cumple con los requisitos.');
+    setPasswordError(translate("passwordError1"));
     return;
   }
 
   if (password !== repeatPassword) {
-    setPasswordError('Las contraseñas no coinciden.');
+    setPasswordError(translate("passwordError2"));
     return;
   }
 
   setPasswordError('');
-    console.log({ username, email, password, repeatPassword, birthday });
-    Alert.alert("Registro exitoso", "¡Bienvenido a SynSpeech!");
-    navigation.navigate("Login"); // Navegar a la pantalla de inicio de sesión después del registro
+    navigation.navigate("SpecialtySelection", {
+      username,
+      email,
+      password,
+      repeatPassword,
+      birthday
+    }); 
   };
 
   // Estilos dinámicos basados en el tema
@@ -108,7 +114,7 @@ export default function RegisterScreen() {
     }
   });
 
-  return (
+  return ( 
     <ScrollView contentContainerStyle={[styles.container, dynamicStyles.container]}>
       <Image
         source={require('../assets/Synlogo.png')}
@@ -118,7 +124,7 @@ export default function RegisterScreen() {
 
       <TextInput
         style={[styles.input, dynamicStyles.input]}
-        placeholder="Nombre de usuario"
+        placeholder= {translate("username")}
         placeholderTextColor={dynamicStyles.placeholderColor.color}
         value={username}
         onChangeText={setUsername}
@@ -126,7 +132,7 @@ export default function RegisterScreen() {
 
       <TextInput
         style={[styles.input, dynamicStyles.input]}
-        placeholder="Correo electrónico"
+        placeholder={translate("email")}
         placeholderTextColor={dynamicStyles.placeholderColor.color}
         keyboardType="email-address"
         autoCapitalize="none"
@@ -136,7 +142,7 @@ export default function RegisterScreen() {
 
       <TextInput
         style={[styles.input, dynamicStyles.input]}
-        placeholder="Contraseña"
+        placeholder={translate("password")} 
         placeholderTextColor={dynamicStyles.placeholderColor.color}
         secureTextEntry
         value={password}
@@ -150,7 +156,7 @@ export default function RegisterScreen() {
             { color: requirements.lengthValid ? "green" : "red" }
           ]}
         >
-          • Entre 8 y 16 caracteres
+          • {translate("passwordLength")}
         </Text>
         <Text
           style={[
@@ -158,7 +164,7 @@ export default function RegisterScreen() {
             { color: requirements.hasUppercase ? "green" : "red" }
           ]}
         >
-          • Al menos una letra mayúscula
+          • {translate("passwordUpper")}
         </Text>
         <Text
           style={[
@@ -166,7 +172,7 @@ export default function RegisterScreen() {
             { color: requirements.hasSymbol ? "green" : "red" }
           ]}
         >
-          • Al menos un símbolo
+          • {translate("passwordSymbol")}
         </Text>
       </View>
 
@@ -176,7 +182,7 @@ export default function RegisterScreen() {
 
       <TextInput
         style={[styles.input, dynamicStyles.input]}
-        placeholder="Repetir contraseña"
+        placeholder={translate("repeatPassword")}
         placeholderTextColor={dynamicStyles.placeholderColor.color}
         secureTextEntry
         value={repeatPassword}
@@ -185,7 +191,7 @@ export default function RegisterScreen() {
 
       <TouchableOpacity onPress={showDatePicker} style={[styles.input, dynamicStyles.input]}>
         <Text style={dynamicStyles.dateText}>
-          {birthday || 'Selecciona tu fecha de nacimiento'}
+          {birthday || translate("birthday")}
         </Text>
       </TouchableOpacity>
 
@@ -198,20 +204,20 @@ export default function RegisterScreen() {
       />
 
       <TouchableOpacity style={[styles.button, dynamicStyles.button]} onPress={handleSignUp}>
-        <Text style={styles.buttonText}>Registrarse</Text>
+        <Text style={styles.buttonText}>{translate("register")}</Text>
       </TouchableOpacity>
 
       <View style={styles.loginContainer}>
         <Text style={[styles.loginText, dynamicStyles.loginText]}>
-          ¿Ya tienes una cuenta?{' '}
+          {translate("haveaccount")}{' '}
         </Text>
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={[styles.loginLink, dynamicStyles.loginLink]}>Inicia sesión</Text>
+          <Text style={[styles.loginLink, dynamicStyles.loginLink]}>{translate("haveaccount2")}</Text>
         </TouchableOpacity>
       </View>
       <StatusBar style={darkMode ? "light" : "dark"} />
     </ScrollView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({

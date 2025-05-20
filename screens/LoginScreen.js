@@ -7,11 +7,13 @@ import styles from "../styles/styles";
 import { useState } from "react";
 import { Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLanguage } from "./LanguageContext";
+import {Animated} from 'react-native';
+import {useEffect, useRef} from 'react';
 
 export default function LoginScreen() {
   const navigation = useNavigation();
   const { darkMode } = useTheme();
-  const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -40,6 +42,37 @@ export default function LoginScreen() {
       Alert.alert('Error', error.message);
     }
   };
+  const { translate } = useLanguage();
+  const logoAnim = useRef(new Animated.Value(-100)).current; // empieza arriba
+const formOpacity = useRef(new Animated.Value(0)).current; // empieza invisible
+const buttonAnim = useRef(new Animated.Value(100)).current; // empieza abajo
+const [email, setEmail] = useState("");
+const [password, setPassword] = useState("");
+
+
+
+useEffect(() => {
+  Animated.sequence([
+    Animated.timing(logoAnim, {
+      toValue: 0,
+      duration: 800,
+      useNativeDriver: true,
+    }),
+    Animated.parallel([
+      Animated.timing(formOpacity, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(buttonAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+    ]),
+  ]).start();
+}, []);
+
 
   const dynamicStyles = StyleSheet.create({
     container: {
@@ -100,12 +133,20 @@ export default function LoginScreen() {
   return (
     <View style={[styles.container, dynamicStyles.container]}>
       <View style={[styles.header, dynamicStyles.header]}>
-        <Image source={require("../assets/Synlogo.png")} style={styles.logo} />
+        <Animated.Image
+  source={require("../assets/Synlogo.png")}
+  style={[
+    styles.logo,
+    { transform: [{ translateY: logoAnim }] }
+  ]}
+/>
+
       </View>
 
       <View style={styles.inputContainer}>
         <View style={[styles.inputWrapper, dynamicStyles.inputWrapper]}>
           <FontAwesome name="envelope" size={18} style={[styles.icon, dynamicStyles.icon]} />
+
           <TextInput
               style={styles.input}
               placeholder="Usuario"
@@ -117,6 +158,7 @@ export default function LoginScreen() {
 
         <View style={[styles.inputWrapper, dynamicStyles.inputWrapper]}>
           <FontAwesome name="lock" size={18} style={[styles.icon, dynamicStyles.icon]} />
+
           <TextInput
               placeholder="Contraseña"
               style={[styles.input, dynamicStyles.input]}
@@ -124,6 +166,7 @@ export default function LoginScreen() {
               value={password}
               onChangeText={setPassword}
               placeholderTextColor={dynamicStyles.placeholderColor.color}
+
           />
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
             <FontAwesome
@@ -136,7 +179,7 @@ export default function LoginScreen() {
       </View>
 
       <TouchableOpacity>
-        <Text style={[styles.forgotPassword, dynamicStyles.forgotPassword]}>¿Olvidaste tu contraseña?</Text>
+        <Text style={[styles.forgotPassword, dynamicStyles.forgotPassword]}>{translate("forgotPassword")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity 
@@ -151,9 +194,9 @@ export default function LoginScreen() {
         <View style={[styles.separatorLine, dynamicStyles.separatorLine]} />
       </View>
 
-      <Text style={[styles.registerText, dynamicStyles.registerText]}>¿Usuario nuevo?</Text>
+      <Text style={[styles.registerText, dynamicStyles.registerText]}>{translate("newUser")}</Text>
       <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-        <Text style={[styles.registeruser, dynamicStyles.registeruser]}>Regístrate aquí</Text>
+        <Text style={[styles.registeruser, dynamicStyles.registeruser]}>{translate("signUp")}</Text>
       </TouchableOpacity>
 
       <StatusBar style={darkMode ? "light" : "dark"} />
