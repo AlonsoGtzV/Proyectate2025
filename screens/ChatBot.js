@@ -10,11 +10,13 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "./ThemeContext";
+import { useLanguage } from "./LanguageContext";
 
 export default function ChatBot({ navigation }) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const { darkMode, toggleTheme } = useTheme();
+  const { translate } = useLanguage();
 
   const handleSend = () => {
     if (message.trim() === "") return;
@@ -100,7 +102,7 @@ export default function ChatBot({ navigation }) {
         {/* Mensaje de bienvenida de la IA */}
         <View style={[styles.aiMessageContainer, dynamicStyles.aiMessageContainer]}>
           <Text style={[styles.aiMessageText, dynamicStyles.aiMessageText]}>
-            ¡Hola! Soy Syn. Estoy aquí para ayudarte a aprender inglés técnico. 😊
+            {translate("message")}
           </Text>
         </View>
 
@@ -125,7 +127,7 @@ export default function ChatBot({ navigation }) {
           style={[styles.textInput, dynamicStyles.textInput]}
           value={message}
           onChangeText={setMessage}
-          placeholder="Escribe tu mensaje..."
+          placeholder={translate("type")}
           placeholderTextColor={darkMode ? "#999" : "#666"}
         />
         <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
@@ -135,8 +137,8 @@ export default function ChatBot({ navigation }) {
 
       {/* Contenedor para los textos e información */}
       <View style={styles.infoContainer}>
-        <Text style={[styles.infoText, dynamicStyles.infoText]}>Syn puede cometer errores.</Text>
-        <Text style={[styles.infoText, dynamicStyles.infoText]}>Sé amable al chatear</Text>
+        <Text style={[styles.infoText, dynamicStyles.infoText]}>{translate("info1")}</Text>
+        <Text style={[styles.infoText, dynamicStyles.infoText]}>{translate("info2")}</Text>
       </View>
 
       {/* Footer */}

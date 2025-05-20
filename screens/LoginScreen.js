@@ -5,11 +5,45 @@ import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "./ThemeContext";
 import styles from "../styles/styles";
 import { useState } from "react";
+import { useLanguage } from "./LanguageContext";
+import {Animated} from 'react-native';
+import {useEffect, useRef} from 'react';
 
 export default function LoginScreen() {
   const navigation = useNavigation();
   const { darkMode } = useTheme();
   const [showPassword, setShowPassword] = useState(false);
+  const { translate } = useLanguage();
+  const logoAnim = useRef(new Animated.Value(-100)).current; // empieza arriba
+const formOpacity = useRef(new Animated.Value(0)).current; // empieza invisible
+const buttonAnim = useRef(new Animated.Value(100)).current; // empieza abajo
+const [email, setEmail] = useState("");
+const [password, setPassword] = useState("");
+
+
+
+useEffect(() => {
+  Animated.sequence([
+    Animated.timing(logoAnim, {
+      toValue: 0,
+      duration: 800,
+      useNativeDriver: true,
+    }),
+    Animated.parallel([
+      Animated.timing(formOpacity, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(buttonAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+    ]),
+  ]).start();
+}, []);
+
 
   const dynamicStyles = StyleSheet.create({
     container: {
@@ -70,16 +104,25 @@ export default function LoginScreen() {
   return (
     <View style={[styles.container, dynamicStyles.container]}>
       <View style={[styles.header, dynamicStyles.header]}>
-        <Image source={require("../assets/Synlogo.png")} style={styles.logo} />
+        <Animated.Image
+  source={require("../assets/Synlogo.png")}
+  style={[
+    styles.logo,
+    { transform: [{ translateY: logoAnim }] }
+  ]}
+/>
+
       </View>
 
       <View style={styles.inputContainer}>
         <View style={[styles.inputWrapper, dynamicStyles.inputWrapper]}>
           <FontAwesome name="envelope" size={18} style={[styles.icon, dynamicStyles.icon]} />
           <TextInput 
-            placeholder="Correo Electrónico" 
+            placeholder={translate("email")} 
             style={[styles.input, dynamicStyles.input]} 
             keyboardType="email-address" 
+             value={email}
+  onChangeText={setEmail}
             placeholderTextColor={dynamicStyles.placeholderColor.color}
           />
         </View>
@@ -87,9 +130,11 @@ export default function LoginScreen() {
         <View style={[styles.inputWrapper, dynamicStyles.inputWrapper]}>
           <FontAwesome name="lock" size={18} style={[styles.icon, dynamicStyles.icon]} />
           <TextInput 
-            placeholder="Contraseña" 
+            placeholder={translate("password")}
             style={[styles.input, dynamicStyles.input]} 
             secureTextEntry={!showPassword}
+            value={password}
+  onChangeText={setPassword}
             placeholderTextColor={dynamicStyles.placeholderColor.color}
           />
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
@@ -103,15 +148,19 @@ export default function LoginScreen() {
       </View>
 
       <TouchableOpacity>
-        <Text style={[styles.forgotPassword, dynamicStyles.forgotPassword]}>¿Olvidaste tu contraseña?</Text>
+        <Text style={[styles.forgotPassword, dynamicStyles.forgotPassword]}>{translate("forgotPassword")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity 
-        style={[styles.loginButton, dynamicStyles.loginButton]} 
-        onPress={() => navigation.navigate("LanguageSelection")}
-      >
-        <Text style={styles.loginButtonText}>Acceder</Text>
-      </TouchableOpacity>
+  style={[styles.loginButton, dynamicStyles.loginButton]} 
+  onPress={() => {
+    console.log("Email:", email);
+    console.log("Password:", password);
+    navigation.navigate("LanguageSelection");
+  }}
+>
+  <Text style={styles.loginButtonText}>{translate("login")}</Text>
+</TouchableOpacity>
 
       <View style={styles.separatorContainer}>
         <View style={[styles.separatorLine, dynamicStyles.separatorLine]} />
@@ -119,9 +168,9 @@ export default function LoginScreen() {
         <View style={[styles.separatorLine, dynamicStyles.separatorLine]} />
       </View>
 
-      <Text style={[styles.registerText, dynamicStyles.registerText]}>¿Usuario nuevo?</Text>
+      <Text style={[styles.registerText, dynamicStyles.registerText]}>{translate("newUser")}</Text>
       <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-        <Text style={[styles.registeruser, dynamicStyles.registeruser]}>Regístrate aquí</Text>
+        <Text style={[styles.registeruser, dynamicStyles.registeruser]}>{translate("signUp")}</Text>
       </TouchableOpacity>
 
       <StatusBar style={darkMode ? "light" : "dark"} />

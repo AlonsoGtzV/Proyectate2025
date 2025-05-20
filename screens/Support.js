@@ -14,37 +14,42 @@ import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useTheme } from "./ThemeContext";
-
-const problems = [
-  "Seleccione un problema...",
-  "Problema técnico",
-  "Problema de acceso",
-  "Problema de contenido",
-  "Sugerencias",
-  "Otros",
-];
+import { useLanguage } from "./LanguageContext";
 
 export default function Support({ navigation }) {
-  const [problemSelected, setProblemSelected] = useState(problems[0]);
-  const [selectedImage, setSelectedImage] = useState(null);
   const { darkMode } = useTheme();
+  const { translate } = useLanguage();
+  const problems = translate("supportProblems") || [];
+  const [problemSelected, setProblemSelected] = useState(problems[0] || "");
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const handlePickImage = async () => {
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        quality: 1,
-      });
+  try {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-      if (!result.canceled) {
-        setSelectedImage(result.assets[0].uri);
-        console.log("Imagen seleccionada:", result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error("Error al seleccionar imagen:", error);
+    if (status !== "granted") {
+      Alert.alert(
+        translate("supportPermissionDeniedTitle"),
+        translate("supportPermissionDeniedMessage")
+      );
+      return;
     }
-  };
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setSelectedImage(result.assets[0].uri);
+      console.log("Imagen seleccionada:", result.assets[0].uri);
+    }
+  } catch (error) {
+    console.error("Error al seleccionar imagen:", error);
+  }
+};
+
 
   // Estilos dinámicos basados en el tema
   const dynamicStyles = StyleSheet.create({
@@ -114,24 +119,26 @@ export default function Support({ navigation }) {
           source={require("../assets/Synlogo.png")}
           style={[styles.logo, dynamicStyles.logo]}
         />
-        <Text style={[styles.headerText, dynamicStyles.headerText]}>Soporte</Text>
+        <Text style={[styles.headerText, dynamicStyles.headerText]}>{translate("supportTitle")}</Text>
+
       </View>
 
       <ScrollView>
         {/* Texto de ayuda */}
-        <Text style={[styles.question, dynamicStyles.question]}>¿Cómo podemos ayudarte?</Text>
-        <Text style={[styles.instructions, dynamicStyles.instructions]}>
-          Por favor, describe el problema con tantos detalles como puedas. Nos ayudará a entender mejor qué es lo que ocurre.
-        </Text>
+        <Text style={[styles.question, dynamicStyles.question]}>{translate("supportQuestion")}</Text>
+<Text style={[styles.instructions, dynamicStyles.instructions]}>
+  {translate("supportInstructions")}
+</Text>
+
 
         {/* Campos del formulario */}
         <TextInput 
-          placeholder="Dirección de correo electrónico" 
+          placeholder={translate("supportEmailPlaceholder")} 
           style={[styles.input, dynamicStyles.input]} 
           placeholderTextColor={dynamicStyles.placeholderColor.color}
         />
         <TextInput 
-          placeholder="Asunto" 
+          placeholder={translate("supportSubjectPlaceholder")} 
           style={[styles.input, dynamicStyles.input]} 
           placeholderTextColor={dynamicStyles.placeholderColor.color}
         />
@@ -156,7 +163,7 @@ export default function Support({ navigation }) {
           </Picker>
         </View>
         <TextInput
-          placeholder="Descripción"
+           placeholder={translate("supportDescriptionPlaceholder")}
           style={[styles.input, dynamicStyles.input, { height: 100 }]}
           multiline
           placeholderTextColor={dynamicStyles.placeholderColor.color}
@@ -168,8 +175,9 @@ export default function Support({ navigation }) {
           onPress={handlePickImage}
         >
           <Text style={[styles.fileButtonText, dynamicStyles.fileButtonText]}>
-            {selectedImage ? "Foto seleccionada" : "Agregar foto (opcional)"}
-          </Text>
+  {selectedImage ? translate("supportPhotoSelected") : translate("supportAddPhoto")}
+</Text>
+
         </TouchableOpacity>
 
         {/* Mostrar la imagen seleccionada */}
@@ -185,13 +193,13 @@ export default function Support({ navigation }) {
           style={[styles.sendButton, dynamicStyles.sendButton]}
           onPress={() =>
             Alert.alert(
-              "Mensaje enviado",
-              "Espera una respuesta pronto en tu bandeja de entrada.",
-              [{ text: "Entendido", style: "default" }]
+              translate("supportSentTitle"),
+              translate("supportSentMessage"),
+              [{ text: translate("understood"), style: "default" }]
             )
           }
         >
-          <Text style={styles.sendButtonText}>Enviar petición</Text>
+          <Text style={styles.sendButtonText}>{translate("supportSend")}</Text>
         </TouchableOpacity>
       </ScrollView>
 

@@ -1,10 +1,11 @@
 // screens/LanguageSelectionScreen.jsx
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { useTheme } from './ThemeContext';
 import Slider from '@react-native-community/slider';
 
-export default function EnglishLevelSelection({ navigation }) {
+export default function EnglishLevelSelection({ navigation, route }) {
+  const {username, email, password, repeatPassword, birthday, specialty} = route.params || {};
   const [selectedLevel, setSelectedLevel] = useState(null);
   const { darkMode } = useTheme();
 
@@ -117,6 +118,8 @@ export default function EnglishLevelSelection({ navigation }) {
         ]}
         onPress={() => {
           if (selectedLevel) {
+            console.log({ username, email, password, repeatPassword, birthday, specialty, selectedLevel });
+
             navigation.navigate('Home');
           }
         }}

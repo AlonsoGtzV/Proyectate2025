@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import LoadingScreen from './LoadingScreen';
 
 const translations = {
   en: {
@@ -55,6 +56,66 @@ const translations = {
     lesson_1_5_sub: "Get a key by completing it",
     locked_unit_alert: 'Unit locked',
     locked_unit_message: "You need a key to access this unit",
+    // ProgressScreen
+    progress: 'Progress',
+    completed: 'Completed',
+    blocked_unit: "Blocked unit",
+    content_not_available: "Content not available",
+    not_done: "Not done",
+    //ChatBot
+    message: "Hello! I'm Syn. I'm here to help you learn technical English. 😊",
+    type: "Write a message...",
+    info1: "Syn can make mistakes.",
+    info2: "Be kind when chatting",
+    //Syllabus (TODO)
+
+    //LoginScreen
+    email: "Email adress",
+    password: "Password",
+    forgotPassword: "Forgot password?",
+    login: "Login",
+    newUser: "New user?",
+    signUp: "Sign up",
+    //RegisterScreen
+    username: "Username",
+    repeatPassword: "Repeat password",
+    birthday: "Choose your birthday",
+    register: "Register",
+    passwordLength: "Password must be between 8 and 16 characters long",  
+    passwordUpper: "Password must contain at least one uppercase letter",
+    passwordSymbol: "Password must contain at least one special character",
+    passwordMatch: "Passwords do not match",
+    passwordError1: "Your password doesn't meet the requirements.",
+    passwordError2: "Passwords do not match.",
+    welcome1: "Sign up successful",
+    welcome2: "Welcome to SynSpeech!",
+    haveaccount: "Already have an account?",
+    haveaccount2: "Log in ",
+    //Support
+supportTitle: "Support",
+supportQuestion: "How can we help you?",
+supportInstructions: "Please describe the problem in as much detail as possible. This will help us understand what's happening.",
+supportEmailPlaceholder: "Email address",
+supportSubjectPlaceholder: "Subject",
+supportDescriptionPlaceholder: "Description",
+supportAddPhoto: "Add photo (optional)",
+supportPhotoSelected: "Photo selected",
+supportSend: "Send request",
+supportSentTitle: "Message sent",
+supportSentMessage: "You will receive a response in your inbox shortly.",
+supportProblems: [
+  "Select a problem...",
+  "Technical issue",
+  "Access problem",
+  "Content issue",
+  "Suggestions",
+  "Other",
+],
+
+  supportPermissionDeniedTitle: "Permission denied",
+supportPermissionDeniedMessage: "We can't access your gallery without your permission.",
+
+
   },
   es: {
     // UserScreen
@@ -107,6 +168,61 @@ const translations = {
     lesson_1_4_sub: "Mejoremos comprensión lectora",
     lesson_1_5: "1.5 - Hora de ponernos a prueba",
     lesson_1_5_sub: "Consigue una llave al completarlo",
+    // ProgressScreen
+    progress: 'Progreso',
+    completed: 'Completado',
+    blocked_unit: "Unidad bloqueada",
+    content_not_available: "Contenido no disponible",
+    not_done: "Sin realizar",
+    //ChatBot
+    message: "¡Hola! Soy Syn. Estoy aquí para ayudarte a aprender inglés técnico. 😊", 
+    type: "Escribe un mensaje...",  
+    info1: "Syn puede cometer errores.",
+    info2: "Sé amable al chatear",
+    //Syllabus (TODO)
+
+    //RegisterScreen
+    // ...
+repeatPassword: "Repite la contraseña",
+birthday: "Selecciona tu fecha de nacimiento",
+register: "Registrarse",
+passwordLength: "La contraseña debe tener entre 8 y 16 caracteres",
+passwordUpper: "Debe contener al menos una letra mayúscula",
+passwordSymbol: "Debe contener al menos un carácter especial",
+passwordError1: "Tu contraseña no cumple con los requisitos.",
+passwordError2: "Las contraseñas no coinciden.",
+haveaccount: "¿Ya tienes una cuenta?",
+haveaccount2: "Inicia sesión",
+username: "Nombre de usuario",
+
+    //LoginScreen
+    email: "Correo electrónico",
+    password: "Contraseña",
+    forgotPassword: "¿Olvidaste tu contraseña?",
+    login: "Acceder",
+    newUser: "¿Nuevo usuario?",
+    signUp: "Regístrate aquí",
+    supportTitle: "Soporte",
+supportQuestion: "¿Cómo podemos ayudarte?",
+supportInstructions: "Por favor, describe el problema con tantos detalles como puedas. Nos ayudará a entender mejor qué es lo que ocurre.",
+supportEmailPlaceholder: "Dirección de correo electrónico",
+supportSubjectPlaceholder: "Asunto",
+supportDescriptionPlaceholder: "Descripción",
+supportAddPhoto: "Agregar foto (opcional)",
+supportPhotoSelected: "Foto seleccionada",
+supportSend: "Enviar petición",
+supportSentTitle: "Mensaje enviado",
+supportSentMessage: "Espera una respuesta pronto en tu bandeja de entrada.",
+supportProblems: [
+  "Seleccione un problema...",
+  "Problema técnico",
+  "Problema de acceso",
+  "Problema de contenido",
+  "Sugerencias",
+  "Otros",
+],
+supportPermissionDeniedTitle: "Permiso denegado",
+supportPermissionDeniedMessage: "No podemos acceder a tu galería sin tu permiso.",
 
   }
 };
@@ -150,11 +266,12 @@ export const LanguageProvider = ({ children }) => {
   }, [language, isLoading]);
 
   const translate = (key) => {
-    return translations[language][key] || key;
+    const currentTranslations = translations[language] || {};
+  return currentTranslations[key] || `[${key}]`;
   };
 
   if (isLoading) {
-    return null; // O un componente de carga si lo prefieres
+    return <LoadingScreen />;
   }
 
   return (

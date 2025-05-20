@@ -8,7 +8,8 @@ const specialties = [
   "Electrónica",
 ];
 
-export default function SpecialtySelectionScreen({ navigation }) {
+export default function SpecialtySelectionScreen({ navigation, route }) {
+  const { username, email, password, repeatPassword, birthday } = route.params ||{};
   const [selectedSpecialty, setSelectedSpecialty] = useState(specialties[0]);
   const { darkMode } = useTheme();
 
@@ -89,7 +90,14 @@ export default function SpecialtySelectionScreen({ navigation }) {
         style={[styles.continueButton, dynamicStyles.continueButton]}
         onPress={() => { 
           if(selectedSpecialty){
-            navigation.navigate("Level");
+            navigation.navigate("Level", {
+              username,
+              email,
+              password,
+              repeatPassword,
+              birthday,
+              specialty: selectedSpecialty,
+            });
           } 
         }}
       >
