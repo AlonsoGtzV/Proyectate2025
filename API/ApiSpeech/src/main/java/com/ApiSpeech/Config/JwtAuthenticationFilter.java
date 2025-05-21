@@ -25,35 +25,43 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+        String path = request.getRequestURI();
+        if (path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs") || path.startsWith("/api/lessons") || path.startsWith("/webjars")) {
+            chain.doFilter(request, response);
+            return;
+        }
         // Validar solo en los endpoints GET
         if (!request.getMethod().equalsIgnoreCase("GET")) {
             chain.doFilter(request, response);
             return;
         }
 
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            try {
-                String username = jwtUtil.validateToken(token);
+        if (request.getMethod().equalsIgnoreCase("GET")) {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                try {
+                    String username = jwtUtil.validateToken(token);
 
-                // Configurar el contexto de seguridad
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                new User(username, "", Collections.emptyList()),
-                                null,
-                                Collections.emptyList()
-                        );
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (RuntimeException e) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token inválido o expirado.");
+                    // Configurar el contexto de seguridad
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    new User(username, "", Collections.emptyList()),
+                                    null,
+                                    Collections.emptyList()
+                            );
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } catch (RuntimeException e) {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token inválido o expirado.");
+                    return;
+                }
+            } else {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token no proporcionado.");
                 return;
             }
-        } else {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token no proporcionado.");
-            return;
         }
+
         chain.doFilter(request, response);
     }
 }
