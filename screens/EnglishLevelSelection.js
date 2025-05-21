@@ -6,12 +6,11 @@ import Slider from '@react-native-community/slider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function EnglishLevelSelection({ navigation, route }) {
-  const {username, email, password, repeatPassword, specialty} = route.params || {};
+  const {username, email, password, specialty} = route.params || {};
   const [selectedLevel, setSelectedLevel] = useState(null);
   const { darkMode } = useTheme();
   const handleRegister = async () => {
-
-    console.log(username, email, password, specialty,selectedLevel);
+    const levelCategory = getLevelCategory(selectedLevel);
     try {
       const response = await fetch('http://10.0.2.2:8080/api/users/register', {
 
@@ -21,7 +20,7 @@ export default function EnglishLevelSelection({ navigation, route }) {
           username,
           password,
           email,
-          englishLevel: selectedLevel,
+          englishLevel: levelCategory,
           languagePreference: route.params?.languagePreference || '', // o el valor adecuado
           specificArea: specialty || '', // o el valor adecuado
           keys: 0,
@@ -143,7 +142,7 @@ export default function EnglishLevelSelection({ navigation, route }) {
           dynamicStyles.continueButton,
           !selectedLevel && { opacity: 0.5 },
         ]}
-        onPress={handleRegister}
+      onPress={handleRegister}
         disabled={!selectedLevel}
       >
         <Text style={styles.continueText}>Continuar</Text>
@@ -162,6 +161,13 @@ function getLevelDetails(level) {
     'C2': 'Puedes expresarte espontáneamente con gran precisión y diferenciar matices.'
   };
   return details[level] || '';
+}
+
+function getLevelCategory(level) {
+  if (level === 'A1' || level === 'A2') return 'Beginner';
+  if (level === 'B1' || level === 'B2') return 'Intermediate';
+  if (level === 'C1' || level === 'C2') return 'Advanced';
+  return '';
 }
 
 const styles = StyleSheet.create({
