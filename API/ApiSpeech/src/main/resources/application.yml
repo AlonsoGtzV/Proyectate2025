@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://synspeechdb.cmn5b0a2bh6p.us-east-1.rds.amazonaws.com:5432/users
+    url: jdbc:postgresql://synspeechdb.cmn5b0a2bh6p.us-east-1.rds.amazonaws.com:5432/users?ssl=true&sslmode=verify-full&sslrootcert=src/main/resources/us-east-1-bundle.pem
     username: pacoeco
     password: jfaap234
     driver-class-name: org.postgresql.Driver
