@@ -4,13 +4,18 @@ import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-na
 import { useTheme } from './ThemeContext';
 import Slider from '@react-native-community/slider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useToken} from "../TokenContext";
 
 export default function EnglishLevelSelection({ navigation, route }) {
   const {username, email, password, specialty} = route.params || {};
   const [selectedLevel, setSelectedLevel] = useState(null);
   const { darkMode } = useTheme();
+  const [loading, setLoading] = useState(false);
+  const { setToken } = useToken();
+
   const handleRegister = async () => {
     const levelCategory = getLevelCategory(selectedLevel);
+    setLoading(true);
     try {
       const response = await fetch('http://10.0.2.2:8080/api/users/register', {
 
@@ -30,6 +35,8 @@ export default function EnglishLevelSelection({ navigation, route }) {
       if (!response.ok) throw new Error('Error en registro');
       const token = await response.text(); // o response.json() según tu backend
       await AsyncStorage.setItem('token', token);
+      setToken(token);
+      setLoading(false);
       navigation.navigate('Home');
     } catch (error) {
       Alert.alert('Error', error.message);

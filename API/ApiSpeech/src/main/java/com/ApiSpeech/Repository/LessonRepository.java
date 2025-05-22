@@ -40,7 +40,7 @@ public class LessonRepository {
         return findById(id).isPresent();
     }
 
-    public List<Lesson> findByFilters(String englishLevel, String languagePreference, String specificArea, String unit) {
+    public List<Lesson> findByFilters(String englishLevel, String languagePreference, String specificArea, Integer unit) {
         return lessonTable.scan()
                 .items()
                 .stream()
