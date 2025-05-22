@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useToken} from "../TokenContext";
 
 export default function EnglishLevelSelection({ navigation, route }) {
-  const {username, email, password, specialty} = route.params || {};
+  const {username, email, password, specificArea} = route.params || {};
   const [selectedLevel, setSelectedLevel] = useState(null);
   const { darkMode } = useTheme();
   const [loading, setLoading] = useState(false);
@@ -26,8 +26,8 @@ export default function EnglishLevelSelection({ navigation, route }) {
           password,
           email,
           englishLevel: levelCategory,
-          languagePreference: route.params?.languagePreference || '', // o el valor adecuado
-          specificArea: specialty || '', // o el valor adecuado
+          languagePreference: route.params?.languagePreference || null, // o el valor adecuado
+          specificArea: specificArea, // o el valor adecuado
           keys: 0,
           unlockedUnits: [0]
         }),

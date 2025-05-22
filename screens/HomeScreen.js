@@ -14,28 +14,117 @@ import { Entypo, MaterialIcons, Ionicons } from "@expo/vector-icons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from './ThemeContext';
 import { useLanguage } from './LanguageContext';
-import { useToken} from "../TokenContext";
+import { useToken } from "../TokenContext";
 
 export default function HomeScreen({ navigation }) {
   const [units, setUnits] = useState([]);
   const [expandedUnit, setExpandedUnit] = useState(null);
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
+  const [loading, setLoading] = useState(true);
   const { darkMode, toggleTheme } = useTheme();
   const { translate } = useLanguage();
   const { width, height } = Dimensions.get('window');
   const { token } = useToken();
 
+  // Datos estáticos de respaldo (del primer archivo)
+  const fallbackUnits = [
+    {
+      id: 1,
+      unitTitle: translate('unit_1_title'),
+      locked: false,
+      lessons: [
+        {
+          lessonContent: {
+            title: translate('lesson_1_1'),
+            subtitle: translate('lesson_1_1_sub'),
+          },
+          iconType: 'book',
+        },
+        {
+          lessonContent: {
+            title: translate('lesson_1_2'),
+            subtitle: translate('lesson_1_2_sub'),
+          },
+          iconType: 'person',
+        },
+        {
+          lessonContent: {
+            title: translate('lesson_1_3'),
+            subtitle: translate('lesson_1_3_sub'),
+          },
+          iconType: 'edit',
+        },
+        {
+          lessonContent: {
+            title: translate('lesson_1_4'),
+            subtitle: translate('lesson_1_4_sub'),
+          },
+          iconType: 'key',
+        },
+      ],
+    },
+    {
+      id: 2,
+      unitTitle: translate('unit_2_title'),
+      locked: true,
+      lessons: [
+        {
+          lessonContent: {
+            title: translate('lesson_2_1'),
+            subtitle: translate('lesson_2_1_sub'),
+          },
+          iconType: 'code-slash',
+        },
+        {
+          lessonContent: {
+            title: translate('lesson_2_2'),
+            subtitle: translate('lesson_2_2_sub'),
+          },
+          iconType: 'developer-mode',
+        },
+        {
+          lessonContent: {
+            title: translate('lesson_2_3'),
+            subtitle: translate('lesson_2_3_sub'),
+          },
+          iconType: 'rocket',
+        },
+        {
+          lessonContent: {
+            title: translate('lesson_2_4'),
+            subtitle: translate('lesson_2_4_sub'),
+          },
+          iconType: 'key',
+        },
+      ],
+    },
+  ];
+
+  // Función para obtener datos del backend
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const userId = await AsyncStorage.getItem('userId');
-        if (!userId) return;
+        if (!userId || !token) {
+          // Si no hay usuario o token, usar datos estáticos
+          setUnits(fallbackUnits);
+          setLoading(false);
+          return;
+        }
+
         // 1. Obtener usuario
         const userRes = await fetch(`http://10.0.2.2:8080/api/users/${userId}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
+
+        if (!userRes.ok) {
+          throw new Error('Error al obtener usuario');
+        }
+
         const user = await userRes.json();
+
         // 2. Armar filtros según usuario
         const filters = {
           englishLevel: user.englishLevel,
@@ -43,21 +132,46 @@ export default function HomeScreen({ navigation }) {
           specificArea: user.specificArea,
           professionalismLevel: user.professionalismLevel
         };
+
         // 3. Obtener lecciones
         const params = new URLSearchParams(filters).toString();
         const lessonsRes = await fetch(`http://10.0.2.2:8080/api/lessons/filter?${params}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
+
+        if (!lessonsRes.ok) {
+          throw new Error('Error al obtener lecciones');
+        }
+
         const data = await lessonsRes.json();
-        // 4. Guardar unidades dinámicas
-        // Suponiendo que la API responde con [{ unitTitle, lessons: [{ title, subtitle, iconType }] }]
-        setUnits(data);
+
+        // 4. Procesar datos y asegurar estructura correcta
+        const processedUnits = data.map((unit, index) => ({
+          ...unit,
+          id: unit.id || index + 1,
+          locked: unit.locked !== undefined ? unit.locked : index > 0, // Primera unidad desbloqueada por defecto
+          lessons: unit.lessons.map(lesson => ({
+            ...lesson,
+            lessonContent: lesson.lessonContent || {
+              title: lesson.title || 'Lección sin título',
+              subtitle: lesson.subtitle || 'Sin descripción'
+            },
+            iconType: lesson.iconType || 'book'
+          }))
+        }));
+
+        setUnits(processedUnits);
       } catch (error) {
         console.error('Error al cargar datos:', error);
+        // En caso de error, usar datos estáticos
+        setUnits(fallbackUnits);
+      } finally {
+        setLoading(false);
       }
     };
-    if (token) fetchData();
-  }, [token]);
+
+    fetchData();
+  }, [token, translate]);
 
   const toggleUnit = (unitIndex) => {
     setExpandedUnit(expandedUnit === unitIndex ? null : unitIndex);
@@ -65,20 +179,23 @@ export default function HomeScreen({ navigation }) {
 
   const handleLockedUnitPress = () => {
     Alert.alert(
-      translate('locked_unit_alert'),
-      translate('locked_unit_message'),
-      [{ text: translate('understood'), style: "default" }]
+        translate('locked_unit_alert'),
+        translate('locked_unit_message'),
+        [{ text: translate('understood'), style: "default" }]
     );
   };
 
-  const getLessonIcon = (iconType) => {
+  const getLessonIcon = (iconType, color = "white") => {
     switch (iconType) {
-      case 'book': return <Ionicons name="book" size={20} color="white" />;
-      case 'person': return <Ionicons name="person" size={20} color="white" />;
-      case 'headset': return <Ionicons name="headset" size={20} color="white" />;
-      case 'edit': return <MaterialIcons name="edit" size={20} color="white" />;
-      case 'key': return <Ionicons name="key" size={20} color="white" />;
-      default: return <Ionicons name="book" size={20} color="white" />;
+      case 'book': return <Ionicons name="book" size={20} color={color} />;
+      case 'person': return <Ionicons name="person" size={20} color={color} />;
+      case 'headset': return <Ionicons name="headset" size={20} color={color} />;
+      case 'edit': return <MaterialIcons name="edit" size={20} color={color} />;
+      case 'key': return <Ionicons name="key" size={20} color={color} />;
+      case 'code-slash': return <Ionicons name="code-slash" size={20} color={color} />;
+      case 'developer-mode': return <MaterialIcons name="developer-mode" size={20} color={color} />;
+      case 'rocket': return <Ionicons name="rocket" size={20} color={color} />;
+      default: return <Ionicons name="book" size={20} color={color} />;
     }
   };
 
@@ -259,7 +376,6 @@ export default function HomeScreen({ navigation }) {
     }
   });
 
-
   const renderTutorialOverlay = () => {
     if (!showTutorial) return null;
 
@@ -273,47 +389,57 @@ export default function HomeScreen({ navigation }) {
       borderColor: darkMode ? '#BDE4E6' : '#2C5E86',
       ...currentStep.style,
       left: typeof currentStep.style.left === 'string' ?
-        (width * parseFloat(currentStep.style.left) / 100) :
-        currentStep.style.left,
+          (width * parseFloat(currentStep.style.left) / 100) :
+          currentStep.style.left,
       right: typeof currentStep.style.right === 'string' ?
-        (width * parseFloat(currentStep.style.right) / 100) :
-        currentStep.style.right,
+          (width * parseFloat(currentStep.style.right) / 100) :
+          currentStep.style.right,
       top: typeof currentStep.style.top === 'string' ?
-        (height * parseFloat(currentStep.style.top) / 100) :
-        currentStep.style.top,
+          (height * parseFloat(currentStep.style.top) / 100) :
+          currentStep.style.top,
       bottom: currentStep.style.bottom,
       width: typeof currentStep.style.width === 'string' ?
-        (width * parseFloat(currentStep.style.width) / 100) :
-        currentStep.style.width,
+          (width * parseFloat(currentStep.style.width) / 100) :
+          currentStep.style.width,
       height: typeof currentStep.style.height === 'string' ?
-        (height * parseFloat(currentStep.style.height) / 100) :
-        currentStep.style.height
+          (height * parseFloat(currentStep.style.height) / 100) :
+          currentStep.style.height
     };
 
     return (
-      <TouchableOpacity
-        activeOpacity={1}
-        style={StyleSheet.absoluteFill}
-        onPress={handleNextStep}
-      >
-        {/* Capa oscura */}
-        <View style={[styles.overlay, { backgroundColor: darkMode ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.7)' }]} />
+        <TouchableOpacity
+            activeOpacity={1}
+            style={StyleSheet.absoluteFill}
+            onPress={handleNextStep}
+        >
+          {/* Capa oscura */}
+          <View style={[styles.overlay, { backgroundColor: darkMode ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.7)' }]} />
 
-        {/* Área resaltada */}
-        <View style={highlightStyle}>
-          <View style={[styles.highlightBorder, { borderColor: darkMode ? '#BDE4E6' : 'white' }]} />
-        </View>
+          {/* Área resaltada */}
+          <View style={highlightStyle}>
+            <View style={[styles.highlightBorder, { borderColor: darkMode ? '#BDE4E6' : 'white' }]} />
+          </View>
 
-        {/* Tooltip */}
-        <View style={styles.tooltipContainer}>
-          <Text style={[styles.tooltipText, dynamicStyles.tooltipText]}>
-            {currentStep.message}
-          </Text>
-          <Text style={styles.tooltipActionText}>{translate('continue')}</Text>
-        </View>
-      </TouchableOpacity>
+          {/* Tooltip */}
+          <View style={styles.tooltipContainer}>
+            <Text style={[styles.tooltipText, dynamicStyles.tooltipText]}>
+              {currentStep.message}
+            </Text>
+            <Text style={styles.tooltipActionText}>{translate('continue')}</Text>
+          </View>
+        </TouchableOpacity>
     );
   };
+
+  if (loading) {
+    return (
+        <View style={[styles.container, dynamicStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+          <Text style={[styles.headerText, { color: darkMode ? '#E0E0E0' : '#2C5E86' }]}>
+            {translate('loading') || 'Cargando...'}
+          </Text>
+        </View>
+    );
+  }
 
   return (
       <View style={[styles.container, dynamicStyles.container]}>
@@ -326,112 +452,130 @@ export default function HomeScreen({ navigation }) {
           <Text style={[styles.headerText, dynamicStyles.headerText]}>{translate('app_name')}</Text>
         </View>
 
-        {/* Unidades dinámicas */}
+        {/* Unidades */}
         <ScrollView style={[styles.lessonContainer, dynamicStyles.lessonContainer]}>
           {units.map((unit, unitIndex) => (
-              <View key={unitIndex}>
+              <View key={unit.id || unitIndex}>
                 <TouchableOpacity
-                    style={[styles.activeUnitHeader, dynamicStyles.activeUnitHeader]}
+                    style={[
+                      styles.activeUnitHeader,
+                      dynamicStyles.activeUnitHeader,
+                      unit.locked && { opacity: 0.5 },
+                    ]}
                     onPress={() => toggleUnit(unitIndex)}
                 >
-                  <Text style={[styles.unitTitle, dynamicStyles.unitTitle]}>{unit.unitTitle}</Text>
-                  <Entypo
-                      name={expandedUnit === unitIndex ? "chevron-up" : "chevron-down"}
-                      size={20}
-                      color={dynamicStyles.unitTitle.color}
-                  />
+                  <Text style={[styles.unitTitle, dynamicStyles.unitTitle]}>
+                    {unit.unitTitle}
+                  </Text>
+
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    {unit.locked && (
+                        <Ionicons name="lock-closed" size={20} color={dynamicStyles.unitTitle.color} />
+                    )}
+                    <Entypo
+                        name={expandedUnit === unitIndex ? "chevron-up" : "chevron-down"}
+                        size={20}
+                        color={dynamicStyles.unitTitle.color}
+                    />
+                  </View>
                 </TouchableOpacity>
+
                 {expandedUnit === unitIndex && (
                     <View style={styles.lessonBoxContainer}>
                       {unit.lessons.map((lesson, lessonIndex) => (
                           <TouchableOpacity
                               key={lessonIndex}
-                              style={[styles.lessonBox, dynamicStyles.lessonBox]}
-                              onPress={() => navigation.navigate('LessonRender', { lesson })}
+                              style={[
+                                styles.lessonBox,
+                                dynamicStyles.lessonBox,
+                                unit.locked && { opacity: 0.5 }
+                              ]}
+                              onPress={() =>
+                                  unit.locked
+                                      ? handleLockedUnitPress()
+                                      : navigation.navigate("Loading", { lesson })
+                              }
                           >
-                                <View style={styles.lessonRow}>
-                              <Text style={[styles.lessonTitle, dynamicStyles.lessonTitle]}>{lesson.lessonContent.title}</Text>
-                                  </View>
-                            </TouchableOpacity>
+                            <View style={styles.lessonRow}>
+                              <Text style={[styles.lessonTitle, dynamicStyles.lessonTitle]}>
+                                {lesson.lessonContent.title}
+                              </Text>
+                              {unit.locked ? (
+                                  <Ionicons name="lock-closed" size={20} color={dynamicStyles.lessonTitle.color} />
+                              ) : (
+                                  getLessonIcon(lesson.iconType, dynamicStyles.lessonTitle.color)
+                              )}
+                            </View>
+                            {lesson.lessonContent.subtitle && (
+                                <Text style={[styles.lessonSubtitle, dynamicStyles.lessonSubtitle]}>
+                                  {lesson.lessonContent.subtitle}
+                                </Text>
+                            )}
+                          </TouchableOpacity>
                       ))}
                     </View>
                 )}
               </View>
           ))}
-
-          {/* Unidad bloqueada */}
-          <TouchableOpacity
-              style={[styles.lockedUnit, dynamicStyles.lockedUnit, { opacity: 0.5 }]}
-              onPress={handleLockedUnitPress}
-          >
-            <Text style={[styles.lockedText, dynamicStyles.lockedText]}>
-              {translate('locked_unit')}
-            </Text>
-            <Ionicons
-                name="lock-closed"
-                size={20}
-                color={dynamicStyles.lockedText.color}
-            />
-          </TouchableOpacity>
         </ScrollView>
 
-      {/* Footer */}
-      <View style={[styles.footer, dynamicStyles.footer]}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Syllabus")}
-          style={styles.footerIcon1}
-        >
-          <Ionicons
-            name="calendar"
-            size={24}
-            color={dynamicStyles.footerIcon.color}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Progress")}
-          style={styles.footerIcon2}
-        >
-          <Ionicons
-            name="stats-chart"
-            size={24}
-            color={dynamicStyles.footerIcon.color}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Home")}
-          style={[styles.footerLogoButton, dynamicStyles.footerLogoButton]}
-        >
-          <Image
-            source={require("../assets/Synlogo.png")}
-            style={[styles.footerLogo, dynamicStyles.footerLogo]}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("ChatBot")}
-          style={styles.footerIcon3}
-        >
-          <Ionicons
-            name="chatbubble-ellipses"
-            size={24}
-            color={dynamicStyles.footerIcon.color}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("User")}
-          style={styles.footerIcon4}
-        >
-          <Ionicons
-            name="person-circle"
-            size={26}
-            color={dynamicStyles.footerIcon.color}
-          />
-        </TouchableOpacity>
-      </View>
+        {/* Footer */}
+        <View style={[styles.footer, dynamicStyles.footer]}>
+          <TouchableOpacity
+              onPress={() => navigation.navigate("Syllabus")}
+              style={styles.footerIcon1}
+          >
+            <Ionicons
+                name="calendar"
+                size={24}
+                color={dynamicStyles.footerIcon.color}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+              onPress={() => navigation.navigate("Progress")}
+              style={styles.footerIcon2}
+          >
+            <Ionicons
+                name="stats-chart"
+                size={24}
+                color={dynamicStyles.footerIcon.color}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+              onPress={() => navigation.navigate("Home")}
+              style={[styles.footerLogoButton, dynamicStyles.footerLogoButton]}
+          >
+            <Image
+                source={require("../assets/Synlogo.png")}
+                style={[styles.footerLogo, dynamicStyles.footerLogo]}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+              onPress={() => navigation.navigate("ChatBot")}
+              style={styles.footerIcon3}
+          >
+            <Ionicons
+                name="chatbubble-ellipses"
+                size={24}
+                color={dynamicStyles.footerIcon.color}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+              onPress={() => navigation.navigate("User")}
+              style={styles.footerIcon4}
+          >
+            <Ionicons
+                name="person-circle"
+                size={26}
+                color={dynamicStyles.footerIcon.color}
+            />
+          </TouchableOpacity>
+        </View>
 
-      {/* Tutorial Overlay */}
-      {renderTutorialOverlay()}
-      <StatusBar style={darkMode ? "light" : "dark"} />
-    </View>
+        {/* Tutorial Overlay */}
+        {renderTutorialOverlay()}
+        <StatusBar style={darkMode ? "light" : "dark"} />
+      </View>
   );
 }
 

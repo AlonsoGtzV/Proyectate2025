@@ -18,12 +18,38 @@ export default function ChatBot({ navigation }) {
   const { darkMode, toggleTheme } = useTheme();
   const { translate } = useLanguage();
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (message.trim() === "") return;
 
-    const newMessage = { text: message, sender: "user" };
-    setMessages([...messages, newMessage]);
+    const lastAIMessage = messages
+        .slice()
+        .reverse()
+        .find((msg) => msg.sender === "ai")?.text || "";
+
+    // Construye el prompt con contexto
+    const systemPrompt = "Eres un chatbot para una app de aprendizaje de inglés técnico. Si el usuario pregunta algo fuera de ese contexto, responde: 'Lo siento, solo puedo responder preguntas sobre inglés técnico.'";
+    const fullPrompt = `${systemPrompt}\nUsuario: ${message}\nIA anterior: ${lastAIMessage}`;
+
+    // Muestra el mensaje del usuario
+    setMessages([...messages, { text: message, sender: "user" }]);
     setMessage("");
+
+    try {
+      const response = await fetch("http://10.0.2.2:8080/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: fullPrompt }),
+      });
+      const data = await response.json();
+
+      // data debería ser { response: "texto de la IA" }
+      setMessages((prev) => [...prev, { text: data.response, sender: "ai" }]);
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        { text: "Error de conexión con la IA.", sender: "ai" },
+      ]);
+    }
   };
 
   // Estilos dinámicos basados en el tema
