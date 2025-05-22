@@ -36,11 +36,11 @@ public class LessonController {
 
     @GetMapping("/filter")
     public List<Lesson> getByFilters(
-            @RequestParam(required = false) String englishLevel,
-            @RequestParam(required = false) String languagePreference,
-            @RequestParam(required = false) String specificArea,
-            @RequestParam(required = false) String professionalismLevel) {
-        return lessonService.getByFilters(englishLevel, languagePreference, specificArea, professionalismLevel);
+            @RequestParam(required = true) String englishLevel,
+            @RequestParam(required = true) String languagePreference,
+            @RequestParam(required = true) String specificArea,
+            @RequestParam(required = true) Integer unit) {
+        return lessonService.getByFilters(englishLevel, languagePreference, specificArea, unit);
     }
     @PutMapping("/{id}")
     public Lesson update(@PathVariable Long id, @RequestBody Lesson lesson) {

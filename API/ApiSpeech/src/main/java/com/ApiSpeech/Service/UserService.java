@@ -6,7 +6,7 @@ import com.ApiSpeech.Dto.UserRegisterDto;
 import java.util.List;
 
 public interface UserService {
-    Users register(UserRegisterDto userDto);
+    String register(UserRegisterDto userDto);
     String login(UserLoginDto loginDto);
     List<Users> getAll();
     Users getById(Long id);

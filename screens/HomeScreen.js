@@ -14,14 +14,50 @@ import { Entypo, MaterialIcons, Ionicons } from "@expo/vector-icons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from './ThemeContext';
 import { useLanguage } from './LanguageContext';
+import { useToken} from "../TokenContext";
 
 export default function HomeScreen({ navigation }) {
+  const [units, setUnits] = useState([]);
   const [expandedUnit, setExpandedUnit] = useState(null);
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
   const { darkMode, toggleTheme } = useTheme();
   const { translate } = useLanguage();
   const { width, height } = Dimensions.get('window');
+  const { token } = useToken();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const userId = await AsyncStorage.getItem('userId');
+        if (!userId) return;
+        // 1. Obtener usuario
+        const userRes = await fetch(`http://10.0.2.2:8080/api/users/${userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        const user = await userRes.json();
+        // 2. Armar filtros según usuario
+        const filters = {
+          englishLevel: user.englishLevel,
+          languagePreference: user.languagePreference,
+          specificArea: user.specificArea,
+          professionalismLevel: user.professionalismLevel
+        };
+        // 3. Obtener lecciones
+        const params = new URLSearchParams(filters).toString();
+        const lessonsRes = await fetch(`http://10.0.2.2:8080/api/lessons/filter?${params}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        const data = await lessonsRes.json();
+        // 4. Guardar unidades dinámicas
+        // Suponiendo que la API responde con [{ unitTitle, lessons: [{ title, subtitle, iconType }] }]
+        setUnits(data);
+      } catch (error) {
+        console.error('Error al cargar datos:', error);
+      }
+    };
+    if (token) fetchData();
+  }, [token]);
 
   const toggleUnit = (unitIndex) => {
     setExpandedUnit(expandedUnit === unitIndex ? null : unitIndex);
@@ -33,6 +69,17 @@ export default function HomeScreen({ navigation }) {
       translate('locked_unit_message'),
       [{ text: translate('understood'), style: "default" }]
     );
+  };
+
+  const getLessonIcon = (iconType) => {
+    switch (iconType) {
+      case 'book': return <Ionicons name="book" size={20} color="white" />;
+      case 'person': return <Ionicons name="person" size={20} color="white" />;
+      case 'headset': return <Ionicons name="headset" size={20} color="white" />;
+      case 'edit': return <MaterialIcons name="edit" size={20} color="white" />;
+      case 'key': return <Ionicons name="key" size={20} color="white" />;
+      default: return <Ionicons name="book" size={20} color="white" />;
+    }
   };
 
   const tutorialSteps = [
@@ -212,38 +259,6 @@ export default function HomeScreen({ navigation }) {
     }
   });
 
-  const units = [
-    {
-      title: translate('unit_1_title'),
-      lessons: [
-        {
-          title: translate('lesson_1_1'),
-          subtitle: translate('lesson_1_1_sub'),
-          icon: <Ionicons name="book" size={20} color="white" />,
-        },
-        {
-          title: translate('lesson_1_2'),
-          subtitle: translate('lesson_1_2_sub'),
-          icon: <Ionicons name="person" size={20} color="white" />,
-        },
-        {
-          title: translate('lesson_1_3'),
-          subtitle: translate('lesson_1_3_sub'),
-          icon: <Ionicons name="headset" size={20} color="white" />,
-        },
-        {
-          title: translate('lesson_1_4'),
-          subtitle: translate('lesson_1_4_sub'),
-          icon: <MaterialIcons name="edit" size={20} color="white" />,
-        },
-        {
-          title: translate('lesson_1_5'),
-          subtitle: translate('lesson_1_5_sub'),
-          icon: <Ionicons name="key" size={20} color="white" />,
-        },
-      ],
-    },
-  ];
 
   const renderTutorialOverlay = () => {
     if (!showTutorial) return null;
@@ -301,70 +316,64 @@ export default function HomeScreen({ navigation }) {
   };
 
   return (
-    <View style={[styles.container, dynamicStyles.container]}>
-      {/* Encabezado */}
-      <View style={[styles.header, dynamicStyles.header]}>
-        <Image
-          source={require("../assets/Synlogo.png")}
-          style={[styles.logo, dynamicStyles.footerLogo]}
-        />
-        <Text style={[styles.headerText, dynamicStyles.headerText]}>{translate('app_name')}</Text>
-      </View>
-
-      {/* Unidades */}
-      <ScrollView style={[styles.lessonContainer, dynamicStyles.lessonContainer]}>
-        {units.map((unit, unitIndex) => (
-          <View key={unitIndex}>
-            <TouchableOpacity
-              style={[styles.activeUnitHeader, dynamicStyles.activeUnitHeader]}
-              onPress={() => toggleUnit(unitIndex)}
-            >
-              <Text style={[styles.unitTitle, dynamicStyles.unitTitle]}>{unit.title}</Text>
-              <Entypo
-                name={expandedUnit === unitIndex ? "chevron-up" : "chevron-down"}
-                size={20}
-                color={dynamicStyles.unitTitle.color}
-              />
-            </TouchableOpacity>
-
-            {/* Lecciones */}
-            {expandedUnit === unitIndex && (
-              <View style={styles.lessonBoxContainer}>
-                {unit.lessons.map((lesson, lessonIndex) => (
-                  <TouchableOpacity
-                    key={lessonIndex}
-                    style={[styles.lessonBox, dynamicStyles.lessonBox]}
-                    onPress={() => console.log(lesson.title)}
-                  >
-                    <View style={styles.lessonRow}>
-                      <Text style={[styles.lessonTitle, dynamicStyles.lessonTitle]}>{lesson.title}</Text>
-                      {React.cloneElement(lesson.icon, {
-                        color: dynamicStyles.lessonTitle.color
-                      })}
-                    </View>
-                    <Text style={[styles.lessonSubtitle, dynamicStyles.lessonSubtitle]}>{lesson.subtitle}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-          </View>
-        ))}
-
-        {/* Unidad bloqueada */}
-        <TouchableOpacity
-          style={[styles.lockedUnit, dynamicStyles.lockedUnit, { opacity: 0.5 }]}
-          onPress={handleLockedUnitPress}
-        >
-          <Text style={[styles.lockedText, dynamicStyles.lockedText]}>
-            {translate('locked_unit')}
-          </Text>
-          <Ionicons
-            name="lock-closed"
-            size={20}
-            color={dynamicStyles.lockedText.color}
+      <View style={[styles.container, dynamicStyles.container]}>
+        {/* Encabezado */}
+        <View style={[styles.header, dynamicStyles.header]}>
+          <Image
+              source={require("../assets/Synlogo.png")}
+              style={[styles.logo, dynamicStyles.footerLogo]}
           />
-        </TouchableOpacity>
-      </ScrollView>
+          <Text style={[styles.headerText, dynamicStyles.headerText]}>{translate('app_name')}</Text>
+        </View>
+
+        {/* Unidades dinámicas */}
+        <ScrollView style={[styles.lessonContainer, dynamicStyles.lessonContainer]}>
+          {units.map((unit, unitIndex) => (
+              <View key={unitIndex}>
+                <TouchableOpacity
+                    style={[styles.activeUnitHeader, dynamicStyles.activeUnitHeader]}
+                    onPress={() => toggleUnit(unitIndex)}
+                >
+                  <Text style={[styles.unitTitle, dynamicStyles.unitTitle]}>{unit.unitTitle}</Text>
+                  <Entypo
+                      name={expandedUnit === unitIndex ? "chevron-up" : "chevron-down"}
+                      size={20}
+                      color={dynamicStyles.unitTitle.color}
+                  />
+                </TouchableOpacity>
+                {expandedUnit === unitIndex && (
+                    <View style={styles.lessonBoxContainer}>
+                      {unit.lessons.map((lesson, lessonIndex) => (
+                          <TouchableOpacity
+                              key={lessonIndex}
+                              style={[styles.lessonBox, dynamicStyles.lessonBox]}
+                              onPress={() => navigation.navigate('LessonRender', { lesson })}
+                          >
+                                <View style={styles.lessonRow}>
+                              <Text style={[styles.lessonTitle, dynamicStyles.lessonTitle]}>{lesson.lessonContent.title}</Text>
+                                  </View>
+                            </TouchableOpacity>
+                      ))}
+                    </View>
+                )}
+              </View>
+          ))}
+
+          {/* Unidad bloqueada */}
+          <TouchableOpacity
+              style={[styles.lockedUnit, dynamicStyles.lockedUnit, { opacity: 0.5 }]}
+              onPress={handleLockedUnitPress}
+          >
+            <Text style={[styles.lockedText, dynamicStyles.lockedText]}>
+              {translate('locked_unit')}
+            </Text>
+            <Ionicons
+                name="lock-closed"
+                size={20}
+                color={dynamicStyles.lockedText.color}
+            />
+          </TouchableOpacity>
+        </ScrollView>
 
       {/* Footer */}
       <View style={[styles.footer, dynamicStyles.footer]}>

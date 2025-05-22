@@ -9,7 +9,7 @@ public interface LessonService {
     List<Lesson> createBulk(List<Lesson> lessons);
     List<Lesson> getAll();
     Lesson getById(Long id);
-    List<Lesson> getByFilters(String englishLevel, String languagePreference, String specificArea, String professionalismLevel);
+    List<Lesson> getByFilters(String englishLevel, String languagePreference, String specificArea, Integer unit);
     Lesson update(Lesson lesson);
     void delete(Long id);
     List<Lesson.Test> getQuestionsByUnit(int unit, String englishLevel, String languagePreference, String specificArea);

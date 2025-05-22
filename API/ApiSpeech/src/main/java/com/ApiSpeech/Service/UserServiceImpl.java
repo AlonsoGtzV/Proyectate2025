@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Users register(UserRegisterDto dto) {
+    public String register(UserRegisterDto dto) {
         String secretHash = calculateSecretHash(dto.getUsername());
 
         SignUpRequest signUpRequest = SignUpRequest.builder()
@@ -93,12 +93,11 @@ public class UserServiceImpl implements UserService {
         user.setKeys(0); // Inicializar con 0 llaves
         user.setUnlockedUnits(List.of(1));
 
-        return userRepository.save(user);
+        return jwtUtil.generateToken(dto.getUsername());
     }
 
     @Override
     public String login(UserLoginDto dto) {
-        System.out.print(dto.getUsername());
         // 1. Autenticación con Cognito
         try {
             InitiateAuthRequest authRequest = InitiateAuthRequest.builder()

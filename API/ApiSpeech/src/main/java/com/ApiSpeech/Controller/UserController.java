@@ -6,6 +6,7 @@ import com.ApiSpeech.Dto.UserUpdateDto;
 import com.ApiSpeech.Model.Users;
 import com.ApiSpeech.Service.UserService;
 import com.ApiSpeech.Repository.UserRepository;
+import com.ApiSpeech.Util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,11 +21,12 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public Users register(@RequestBody UserRegisterDto dto) {
-        return userService.register(dto);
-    }
+    public String register(@RequestBody UserRegisterDto dto) {
+        return userService.register(dto);   }
 
     @PostMapping("/login")
     public String login(@RequestBody UserLoginDto dto) {

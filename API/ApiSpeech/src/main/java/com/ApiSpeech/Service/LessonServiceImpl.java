@@ -53,8 +53,8 @@ public class LessonServiceImpl implements LessonService {
 
 
     @Override
-    public List<Lesson> getByFilters(String englishLevel, String languagePreference, String specificArea, String professionalismLevel) {
-        List<Lesson> lessons = lessonRepository.findByFilters(englishLevel, languagePreference, specificArea, professionalismLevel);
+    public List<Lesson> getByFilters(String englishLevel, String languagePreference, String specificArea,  Integer unit) {
+        List<Lesson> lessons = lessonRepository.findByFilters(englishLevel, languagePreference, specificArea, unit);
         if (lessons.isEmpty()) {
             throw new LessonNotFoundException("No se encontraron lecciones con los filtros proporcionados.");
         }
