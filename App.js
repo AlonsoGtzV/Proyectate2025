@@ -18,6 +18,7 @@ import EnglishLevelSelection from "./screens/EnglishLevelSelection";
 import LoadingScreen from "./screens/LoadingScreen";
 import LessonRender from "./screens/LessonRender";
 import {TokenProvider} from "./TokenContext";
+import { UserProvider } from "./screens/UserContext";
 
 const Stack = createStackNavigator();
 
@@ -27,6 +28,7 @@ export default function App() {
 		  <LanguageProvider>
 		  <ThemeProvider>
 	        <TutorialProvider>
+				<UserProvider>
 		      <NavigationContainer>
 		        <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
 					<Stack.Screen name="Splash" component={SplashScreen} />
@@ -45,6 +47,7 @@ export default function App() {
 					<Stack.Screen name="LessonRender" component={LessonRender} />
 		        </Stack.Navigator>
 		      </NavigationContainer>
+			  </UserProvider>
 	        </TutorialProvider>
 		  </ThemeProvider>
 		  </LanguageProvider>
