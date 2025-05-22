@@ -15,6 +15,8 @@ import { TutorialProvider } from "./screens/TutorialContext";
 import { ThemeProvider } from "./screens/ThemeContext"; 
 import { LanguageProvider } from "./screens/LanguageContext";
 import EnglishLevelSelection from "./screens/EnglishLevelSelection";
+import LoadingScreen from "./screens/LoadingScreen";
+import LessonRender from "./screens/LessonRender";
 import {TokenProvider} from "./TokenContext";
 
 const Stack = createStackNavigator();
@@ -22,28 +24,30 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
       <TokenProvider>
-	    <LanguageProvider>
-          <ThemeProvider>
+		  <LanguageProvider>
+		  <ThemeProvider>
 	        <TutorialProvider>
 		      <NavigationContainer>
 		        <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
-			      <Stack.Screen name="Splash" component={SplashScreen} />
-			      <Stack.Screen name="Login" component={LoginScreen} />
-			      <Stack.Screen name="Register" component={RegisterScreen} />
-			      <Stack.Screen name="LanguageSelection" component={LanguageSelectionScreen} />
-			      <Stack.Screen name="SpecialtySelection" component={SpecialtySelectionScreen} />
-			      <Stack.Screen name="Level" component={EnglishLevelSelection} />
-			      <Stack.Screen name="Home" component={HomeScreen} />
-			      <Stack.Screen name="User" component={UserScreen} />
-			      <Stack.Screen name="ChatBot" component={ChatBot} />
-			      <Stack.Screen name="Support" component={Support} />
-                  <Stack.Screen name="Syllabus" component={Syllabus} />
-			      <Stack.Screen name="Progress" component={ProgressScreen} />
+					<Stack.Screen name="Splash" component={SplashScreen} />
+					<Stack.Screen name="Login" component={LoginScreen} />
+					<Stack.Screen name="Register" component={RegisterScreen} />
+					<Stack.Screen name="LanguageSelection" component={LanguageSelectionScreen} />
+					<Stack.Screen name="SpecialtySelection" component={SpecialtySelectionScreen} />
+					<Stack.Screen name="Level" component={EnglishLevelSelection} />
+					<Stack.Screen name="Home" component={HomeScreen} />
+					<Stack.Screen name="User" component={UserScreen} />
+					<Stack.Screen name="ChatBot" component={ChatBot} />
+					<Stack.Screen name="Support" component={Support} />
+					<Stack.Screen name="Syllabus" component={Syllabus} />
+					<Stack.Screen name="Progress" component={ProgressScreen} />
+					<Stack.Screen name="Loading" component={LoadingScreen} />
+					<Stack.Screen name="LessonRender" component={LessonRender} />
 		        </Stack.Navigator>
 		      </NavigationContainer>
 	        </TutorialProvider>
-	      </ThemeProvider>
-	    </LanguageProvider>
+		  </ThemeProvider>
+		  </LanguageProvider>
       </TokenProvider>
   );
 }

@@ -88,10 +88,11 @@ public class UserServiceImpl implements UserService {
         Users user = new Users();
         user.setCognitoUsername(dto.getUsername());
         user.setEnglishLevel(dto.getEnglishLevel());
-        user.setLanguagePreference(dto.getLanguagePreference());
+        user.setLanguagePreference(dto.getLanguagePreference() != null ? dto.getLanguagePreference() : "es");
         user.setSpecificArea(dto.getSpecificArea());
         user.setKeys(0); // Inicializar con 0 llaves
         user.setUnlockedUnits(List.of(1));
+        userRepository.save(user);
 
         return jwtUtil.generateToken(dto.getUsername());
     }

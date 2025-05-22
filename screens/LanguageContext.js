@@ -1,7 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import LoadingScreen from './LoadingScreen';
-
+import { View, Text, ActivityIndicator, Image } from 'react-native';
 const translations = {
   en: {
     // UserScreen
@@ -33,7 +32,6 @@ const translations = {
     app_name: "SynSpeech",
     understood: "OK",
     continue: "Continue",
-    locked_unit: "Unit 2. From zero to hero in software development",
     tutorial_lessons: "Here you'll find your available learning units. Tap a unit to expand it and see the lessons it contains.",
     tutorial_locked_unit: "Some units will be locked. You'll need a key to access them.",
     tutorial_key: "You can get keys by completing tests at the end of each unit. Try to complete them all to unlock all units!",
@@ -54,6 +52,15 @@ const translations = {
     lesson_1_4_sub: "Improve reading comprehension",
     lesson_1_5: "1.5 - Time to test ourselves",
     lesson_1_5_sub: "Get a key by completing it",
+    unit_2_title: "Unit 2. From zero to hero in software development",
+    lesson_2_1: "2.1 - Hello World!",
+    lesson_2_1_sub: "Learn about programming concepts",
+    lesson_2_2: "2.2 - Frontend vs Backend",
+    lesson_2_2_sub: "Let's understand both sides!",
+    lesson_2_3: "2.3 - Components and libraries",
+    lesson_2_3_sub: "What do they mean?",
+    lesson_2_4: "2.4 - Let's put ourselves to the test!",
+    lesson_2_4_sub: "Get a key by completing it!",
     locked_unit_alert: 'Unit locked',
     locked_unit_message: "You need a key to access this unit",
     // ProgressScreen
@@ -68,7 +75,10 @@ const translations = {
     info1: "Syn can make mistakes.",
     info2: "Be kind when chatting",
     //Syllabus (TODO)
-
+    loading: "Loading...",
+    preparing_lesson: "Preparing lesson...",
+    loading_content: "Loading content...",
+    almost_ready: "Almost ready...",
     //LoginScreen
     email: "Email adress",
     password: "Password",
@@ -81,7 +91,7 @@ const translations = {
     repeatPassword: "Repeat password",
     birthday: "Choose your birthday",
     register: "Register",
-    passwordLength: "Password must be between 8 and 16 characters long",  
+    passwordLength: "Password must be between 8 and 16 characters long",
     passwordUpper: "Password must contain at least one uppercase letter",
     passwordSymbol: "Password must contain at least one special character",
     passwordMatch: "Passwords do not match",
@@ -92,29 +102,32 @@ const translations = {
     haveaccount: "Already have an account?",
     haveaccount2: "Log in ",
     //Support
-supportTitle: "Support",
-supportQuestion: "How can we help you?",
-supportInstructions: "Please describe the problem in as much detail as possible. This will help us understand what's happening.",
-supportEmailPlaceholder: "Email address",
-supportSubjectPlaceholder: "Subject",
-supportDescriptionPlaceholder: "Description",
-supportAddPhoto: "Add photo (optional)",
-supportPhotoSelected: "Photo selected",
-supportSend: "Send request",
-supportSentTitle: "Message sent",
-supportSentMessage: "You will receive a response in your inbox shortly.",
-supportProblems: [
-  "Select a problem...",
-  "Technical issue",
-  "Access problem",
-  "Content issue",
-  "Suggestions",
-  "Other",
-],
+    supportTitle: "Support",
+    supportQuestion: "How can we help you?",
+    supportInstructions: "Please describe the problem in as much detail as possible. This will help us understand what's happening.",
+    supportEmailPlaceholder: "Email address",
+    supportSubjectPlaceholder: "Subject",
+    supportDescriptionPlaceholder: "Description",
+    supportAddPhoto: "Add photo (optional)",
+    supportPhotoSelected: "Photo selected",
+    supportSend: "Send request",
+    supportSentTitle: "Message sent",
+    supportSentMessage: "You will receive a response in your inbox shortly.",
+    supportProblems: [
+      "Select a problem...",
+      "Technical issue",
+      "Access problem",
+      "Content issue",
+      "Suggestions",
+      "Other",
+    ],
 
-  supportPermissionDeniedTitle: "Permission denied",
-supportPermissionDeniedMessage: "We can't access your gallery without your permission.",
-
+    supportPermissionDeniedTitle: "Permission denied",
+    supportPermissionDeniedMessage: "We can't access your gallery without your permission.",
+    //Loading
+    bridgeToEnglish: "Professional English, your bridge to success",
+    loading: 'Loading',
+    lessonLoaded: 'Lesson loaded',
 
   },
   es: {
@@ -147,7 +160,6 @@ supportPermissionDeniedMessage: "We can't access your gallery without your permi
     app_name: "SynSpeech",
     understood: "Entendido",
     continue: "Continuar",
-    locked_unit: "Unidad 2. De cero a cien en desarrollo de software",
     tutorial_lessons: "Aquí encontrarás tus unidades de aprendizaje disponibles. Puedes tocar una unidad para expandirla y ver las lecciones que contiene.",
     tutorial_locked_unit: "Hay unidades que estarán bloqueadas. Necesitarás una llave para acceder a ellas.",
     tutorial_key: "Puedes conseguir llaves completando pruebas al final de cada unidad. ¡Intenta completarlas todas para desbloquear todas las unidades!",
@@ -162,12 +174,21 @@ supportPermissionDeniedMessage: "We can't access your gallery without your permi
     lesson_1_1_sub: "¡Aprende vocabulario básico!",
     lesson_1_2: "1.2 - ¡Leamos un poco!",
     lesson_1_2_sub: "Mejoremos comprensión lectora",
-    lesson_1_3: "1.3 - ¿Qué tal si escuchamos algo?",
-    lesson_1_3_sub: "¡Practiquemos con audios reales!",
-    lesson_1_4: "1.4 - Escribiendo... ¡Completado!",
-    lesson_1_4_sub: "Mejoremos comprensión lectora",
-    lesson_1_5: "1.5 - Hora de ponernos a prueba",
-    lesson_1_5_sub: "Consigue una llave al completarlo",
+    lesson_1_3: "1.3 - Escribiendo... ¡Completado!",
+    lesson_1_3_sub: "Mejoremos comprensión lectora",
+    lesson_1_4: "1.4 - Hora de ponernos a prueba",
+    lesson_1_4_sub: "Consigue una llave al completarlo",
+    unit_2_title: "Unidad 2. De cero a cien en desarrollo de software",
+    lesson_2_1: "2.1 - Hola Mundo!",
+    lesson_2_1_sub: "Aprende sobre conceptos de programación",
+    lesson_2_2: "2.2 - Frontend vs Backend",
+    lesson_2_2_sub: "¡Comprendamos ambos lados!",
+    lesson_2_3: "2.3 - Componentes y librerías",
+    lesson_2_3_sub: "¿Qué significan?",
+    lesson_2_4: "¡Pongámonos a prueba!",
+    lesson_2_4_sub: "¡Consigue una llave al completarlo!",
+    locked_unit_alert: 'Unidad bloqueada',
+    locked_unit_message: "Necesitas una llave para acceder a esta unidad",
     // ProgressScreen
     progress: 'Progreso',
     completed: 'Completado',
@@ -175,25 +196,28 @@ supportPermissionDeniedMessage: "We can't access your gallery without your permi
     content_not_available: "Contenido no disponible",
     not_done: "Sin realizar",
     //ChatBot
-    message: "¡Hola! Soy Syn. Estoy aquí para ayudarte a aprender inglés técnico. 😊", 
-    type: "Escribe un mensaje...",  
+    message: "¡Hola! Soy Syn. Estoy aquí para ayudarte a aprender inglés técnico. 😊",
+    type: "Escribe un mensaje...",
     info1: "Syn puede cometer errores.",
     info2: "Sé amable al chatear",
     //Syllabus (TODO)
+    loading: "Cargando...",
+    preparing_lesson: "Preparando lección...",
+    loading_content: "Cargando contenido...",
+    almost_ready: "Casi listo...",
 
     //RegisterScreen
-    // ...
-repeatPassword: "Repite la contraseña",
-birthday: "Selecciona tu fecha de nacimiento",
-register: "Registrarse",
-passwordLength: "La contraseña debe tener entre 8 y 16 caracteres",
-passwordUpper: "Debe contener al menos una letra mayúscula",
-passwordSymbol: "Debe contener al menos un carácter especial",
-passwordError1: "Tu contraseña no cumple con los requisitos.",
-passwordError2: "Las contraseñas no coinciden.",
-haveaccount: "¿Ya tienes una cuenta?",
-haveaccount2: "Inicia sesión",
-username: "Nombre de usuario",
+    repeatPassword: "Repite la contraseña",
+    birthday: "Selecciona tu fecha de nacimiento",
+    register: "Registrarse",
+    passwordLength: "La contraseña debe tener entre 8 y 16 caracteres",
+    passwordUpper: "Debe contener al menos una letra mayúscula",
+    passwordSymbol: "Debe contener al menos un carácter especial",
+    passwordError1: "Tu contraseña no cumple con los requisitos.",
+    passwordError2: "Las contraseñas no coinciden.",
+    haveaccount: "¿Ya tienes una cuenta?",
+    haveaccount2: "Inicia sesión",
+    username: "Nombre de usuario",
 
     //LoginScreen
     email: "Correo electrónico",
@@ -203,27 +227,31 @@ username: "Nombre de usuario",
     newUser: "¿Nuevo usuario?",
     signUp: "Regístrate aquí",
     supportTitle: "Soporte",
-supportQuestion: "¿Cómo podemos ayudarte?",
-supportInstructions: "Por favor, describe el problema con tantos detalles como puedas. Nos ayudará a entender mejor qué es lo que ocurre.",
-supportEmailPlaceholder: "Dirección de correo electrónico",
-supportSubjectPlaceholder: "Asunto",
-supportDescriptionPlaceholder: "Descripción",
-supportAddPhoto: "Agregar foto (opcional)",
-supportPhotoSelected: "Foto seleccionada",
-supportSend: "Enviar petición",
-supportSentTitle: "Mensaje enviado",
-supportSentMessage: "Espera una respuesta pronto en tu bandeja de entrada.",
-supportProblems: [
-  "Seleccione un problema...",
-  "Problema técnico",
-  "Problema de acceso",
-  "Problema de contenido",
-  "Sugerencias",
-  "Otros",
-],
-supportPermissionDeniedTitle: "Permiso denegado",
-supportPermissionDeniedMessage: "No podemos acceder a tu galería sin tu permiso.",
+    supportQuestion: "¿Cómo podemos ayudarte?",
+    supportInstructions: "Por favor, describe el problema con tantos detalles como puedas. Nos ayudará a entender mejor qué es lo que ocurre.",
+    supportEmailPlaceholder: "Dirección de correo electrónico",
+    supportSubjectPlaceholder: "Asunto",
+    supportDescriptionPlaceholder: "Descripción",
+    supportAddPhoto: "Agregar foto (opcional)",
+    supportPhotoSelected: "Foto seleccionada",
+    supportSend: "Enviar petición",
+    supportSentTitle: "Mensaje enviado",
+    supportSentMessage: "Espera una respuesta pronto en tu bandeja de entrada.",
+    supportProblems: [
+      "Seleccione un problema...",
+      "Problema técnico",
+      "Problema de acceso",
+      "Problema de contenido",
+      "Sugerencias",
+      "Otros",
+    ],
+    supportPermissionDeniedTitle: "Permiso denegado",
+    supportPermissionDeniedMessage: "No podemos acceder a tu galería sin tu permiso.",
 
+    //Loading
+    bridgeToEnglish: "Tu puente al inglés profesional",
+    loading: 'Cargando',
+    lessonLoaded: 'Lección cargada',
   }
 };
 
@@ -246,7 +274,6 @@ export const LanguageProvider = ({ children }) => {
         setIsLoading(false);
       }
     };
-
     loadLanguage();
   }, []);
 
@@ -265,19 +292,24 @@ export const LanguageProvider = ({ children }) => {
     }
   }, [language, isLoading]);
 
-  const translate = (key) => {
-    const currentTranslations = translations[language] || {};
-  return currentTranslations[key] || `[${key}]`;
-  };
+  const translate = (key) => translations[language]?.[key] || key;
+
 
   if (isLoading) {
-    return <LoadingScreen />;
+    return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#2C5E86' }}>
+          <Image source={require('../assets/Synlogo.png')} style={{ width: 80, height: 80, marginBottom: 20 }} />
+          <Text style={{ color: 'white', fontSize: 18 }}>Loading...</Text>
+          <ActivityIndicator size="large" color="#BDE4E6" />
+        </View>
+    );
   }
 
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, translate }}>
-      {children}
-    </LanguageContext.Provider>
+      <LanguageContext.Provider value={{ language, setLanguage, translate, isLoading }}>
+        {children}
+      </LanguageContext.Provider>
   );
 };
 
