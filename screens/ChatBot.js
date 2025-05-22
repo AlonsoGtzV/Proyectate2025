@@ -72,9 +72,6 @@ export default function ChatBot({ navigation }) {
     userMessage: {
       backgroundColor: darkMode ? '#2C5E86' : '#83D8E1',
     },
-    aiMessage: {
-      backgroundColor: darkMode ? '#333' : '#CDE8F0',
-    },
     messageText: {
       color: darkMode ? '#E0E0E0' : '#000',
     },
@@ -135,14 +132,19 @@ export default function ChatBot({ navigation }) {
         {messages.map((msg, index) => (
           <View
             key={index}
-            style={[
-              styles.messageBubble,
+            style={
               msg.sender === "user"
-                ? [styles.userMessage, dynamicStyles.userMessage]
-                : [styles.aiMessage, dynamicStyles.aiMessage],
-            ]}
+                ? [styles.messageBubble, styles.userMessage, dynamicStyles.userMessage]
+                : [styles.aiMessageContainer, dynamicStyles.aiMessageContainer]
+            }
           >
-            <Text style={[styles.messageText, dynamicStyles.messageText]}>{msg.text}</Text>
+            <Text style={
+              msg.sender === "user"
+                ? [styles.messageText, dynamicStyles.messageText]
+                : [styles.aiMessageText, dynamicStyles.aiMessageText]
+            }>
+              {msg.text}
+            </Text>
           </View>
         ))}
       </ScrollView>
@@ -262,10 +264,6 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
     backgroundColor: "#83D8E1",
   },
-  aiMessage: {
-    alignSelf: "flex-start",
-    backgroundColor: "#CDE8F0",
-  },
   messageText: {
     fontSize: 14,
     color: "#000",
@@ -359,6 +357,8 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     borderLeftWidth: 5,
     borderLeftColor: "#2C5E86",
+    alignSelf: "flex-start",
+    maxWidth: "85%",
   },
   aiMessageText: {
     color: "#333",
