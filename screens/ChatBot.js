@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,12 +11,40 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "./ThemeContext";
 import { useLanguage } from "./LanguageContext";
+import TypingIndicator from "../TypingIndicator";
+import { useToken } from "../TokenContext";
 
 export default function ChatBot({ navigation }) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [isTyping, setIsTyping] = useState(false);
   const { darkMode, toggleTheme } = useTheme();
   const { translate } = useLanguage();
+  const [userConfig, setUserConfig] = useState(null);
+  const { token } = useToken();
+
+  useEffect(() => {
+    const fetchUserConfig = async () => {
+      const userId = await AsyncStorage.getItem('userId');
+      if (!userId || !token) return;
+      try {
+        const res = await fetch(`http://10.0.2.2:8080/api/users/${userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const user = await res.json();
+          setUserConfig({
+            language: user.languagePreference,
+            englishLevel: user.englishLevel,
+            area: user.specificArea,
+          });
+        }
+      } catch (e) {
+        // Manejo de error opcional
+      }
+    };
+    fetchUserConfig();
+  }, [token]);
 
   const handleSend = async () => {
     if (message.trim() === "") return;
@@ -27,12 +55,17 @@ export default function ChatBot({ navigation }) {
         .find((msg) => msg.sender === "ai")?.text || "";
 
     // Construye el prompt con contexto
-    const systemPrompt = "Eres un chatbot para una app de aprendizaje de inglés técnico. Si el usuario pregunta algo fuera de ese contexto, responde: 'Lo siento, solo puedo responder preguntas sobre inglés técnico.'";
+    const systemPrompt = `Eres un chatbot para una app de aprendizaje de inglés técnico.
+Idioma preferido del usuario: ${userConfig?.language || "español"}.
+Nivel de inglés: ${userConfig?.englishLevel || "desconocido"}.
+Área de interés: ${userConfig?.area || "general"}.
+Si el usuario pregunta algo fuera de ese contexto, responde: 'Lo siento, solo puedo responder preguntas sobre inglés técnico.'`;
     const fullPrompt = `${systemPrompt}\nUsuario: ${message}\nIA anterior: ${lastAIMessage}`;
 
     // Muestra el mensaje del usuario
     setMessages([...messages, { text: message, sender: "user" }]);
     setMessage("");
+    setIsTyping(true);
 
     try {
       const response = await fetch("http://10.0.2.2:8080/api/chat", {
@@ -49,6 +82,9 @@ export default function ChatBot({ navigation }) {
         ...prev,
         { text: "Error de conexión con la IA.", sender: "ai" },
       ]);
+    }
+    finally {
+        setIsTyping(false);
     }
   };
 
@@ -147,6 +183,13 @@ export default function ChatBot({ navigation }) {
             </Text>
           </View>
         ))}
+
+        {/* Indicador de que la IA está escribiendo */}
+        {isTyping && (
+            <View style={[styles.aiMessageContainer, dynamicStyles.aiMessageContainer]}>
+              <TypingIndicator color={darkMode ? "#BDE4E6" : "#2C5E86"} />
+            </View>
+        )}
       </ScrollView>
 
       {/* Input */}
