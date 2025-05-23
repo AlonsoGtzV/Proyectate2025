@@ -252,7 +252,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#2C5E86',
         paddingHorizontal: 15,
-        paddingVertical: 10,
+        paddingVertical: 20,
+        paddingTop: 40,
         justifyContent: 'space-between',
     },
     backButton: {
@@ -271,6 +272,7 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
         padding: 20,
+        marginTop: 10,
     },
     title: {
         fontSize: 24,
