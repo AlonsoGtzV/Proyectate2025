@@ -1,5 +1,6 @@
 package com.ApiSpeech.Service;
 
+import com.ApiSpeech.Dto.AuthResponseDto;
 import com.ApiSpeech.Dto.UserLoginDto;
 import com.ApiSpeech.Dto.UserRegisterDto;
 import com.ApiSpeech.Model.Users;
@@ -60,7 +61,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String register(UserRegisterDto dto) {
+    public AuthResponseDto register(UserRegisterDto dto) {
         String secretHash = calculateSecretHash(dto.getUsername());
 
         SignUpRequest signUpRequest = SignUpRequest.builder()
@@ -68,7 +69,7 @@ public class UserServiceImpl implements UserService {
                 .username(dto.getUsername())
                 .password(dto.getPassword())
                 .userAttributes(AttributeType.builder().name("email").value(dto.getEmail()).build())
-                .secretHash(secretHash) // Añadir el SECRET_HASH
+                .secretHash(secretHash)
                 .build();
 
         try {
@@ -84,6 +85,25 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Error en Cognito: " + e.awsErrorDetails().errorMessage());
         }
 
+        // Determinar las unidades desbloqueadas según el nivel de inglés
+        List<Integer> unlockedUnits = new ArrayList<>();
+        switch (dto.getEnglishLevel().toLowerCase()) {
+            case "beginner":
+                unlockedUnits.add(1);
+                break;
+            case "intermediate":
+                unlockedUnits.add(1);
+                unlockedUnits.add(2);
+                break;
+            case "advanced":
+                unlockedUnits.add(1);
+                unlockedUnits.add(2);
+                unlockedUnits.add(3);
+                break;
+            default:
+                throw new RuntimeException("Nivel de inglés no válido: " + dto.getEnglishLevel());
+        }
+
         // Guardar en la base de datos
         Users user = new Users();
         user.setCognitoUsername(dto.getUsername());
@@ -91,14 +111,15 @@ public class UserServiceImpl implements UserService {
         user.setLanguagePreference(dto.getLanguagePreference() != null ? dto.getLanguagePreference() : "es");
         user.setSpecificArea(dto.getSpecificArea());
         user.setKeys(0); // Inicializar con 0 llaves
-        user.setUnlockedUnits(List.of(1));
+        user.setUnlockedUnits(unlockedUnits);
         userRepository.save(user);
 
-        return jwtUtil.generateToken(dto.getUsername());
+        String token = jwtUtil.generateToken(dto.getUsername());
+        return new AuthResponseDto(token, user.getId());
     }
 
     @Override
-    public String login(UserLoginDto dto) {
+    public AuthResponseDto login(UserLoginDto dto) {
         // 1. Autenticación con Cognito
         try {
             InitiateAuthRequest authRequest = InitiateAuthRequest.builder()
@@ -121,8 +142,13 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Error al autenticar con Cognito: " + e.awsErrorDetails().errorMessage());
         }
 
-        // 2. Buscar configuración del usuario
-        return jwtUtil.generateToken(dto.getUsername());
+        Users user = userRepository.findByCognitoUsername(dto.getUsername());
+        if (user == null) {
+            throw new RuntimeException("Usuario no encontrado en la base de datos.");
+        }
+
+        String token = jwtUtil.generateToken(dto.getUsername());
+        return new AuthResponseDto(token, user.getId());
     }
 
     @Override

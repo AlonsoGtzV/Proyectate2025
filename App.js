@@ -17,7 +17,7 @@ import { LanguageProvider } from "./screens/LanguageContext";
 import EnglishLevelSelection from "./screens/EnglishLevelSelection";
 import LoadingScreen from "./screens/LoadingScreen";
 import LessonRender from "./screens/LessonRender";
-import {TokenProvider} from "./TokenContext";
+import {TokenProvider} from "./services/TokenContext";
 import { UserProvider } from "./screens/UserContext";
 
 const Stack = createStackNavigator();

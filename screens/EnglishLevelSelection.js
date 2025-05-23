@@ -1,10 +1,9 @@
-// screens/LanguageSelectionScreen.jsx
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { useTheme } from './ThemeContext';
 import Slider from '@react-native-community/slider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useToken} from "../TokenContext";
+import {useToken} from "../services/TokenContext";
 import { useUser } from './UserContext';
 
 export default function EnglishLevelSelection({ navigation, route }) {
@@ -35,8 +34,9 @@ export default function EnglishLevelSelection({ navigation, route }) {
         }),
       });
       if (!response.ok) throw new Error('Error en registro');
-      const token = await response.text(); // o response.json() según tu backend
+      const { token, userId } = await response.json();
       await AsyncStorage.setItem('token', token);
+      await AsyncStorage.setItem('userId', userId.toString());
       setToken(token);
       await AsyncStorage.setItem('userData', JSON.stringify({
         username,
@@ -44,6 +44,7 @@ export default function EnglishLevelSelection({ navigation, route }) {
         englishLevel: levelCategory,
         specificArea: specificArea,
       }))
+
       setLoading(false);
       navigation.navigate('Home');
     } catch (error) {

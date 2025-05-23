@@ -1,5 +1,6 @@
 package com.ApiSpeech.Controller;
 
+import com.ApiSpeech.Dto.AuthResponseDto;
 import com.ApiSpeech.Dto.UserLoginDto;
 import com.ApiSpeech.Dto.UserRegisterDto;
 import com.ApiSpeech.Dto.UserUpdateDto;
@@ -25,11 +26,11 @@ public class UserController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public String register(@RequestBody UserRegisterDto dto) {
+    public AuthResponseDto register(@RequestBody UserRegisterDto dto) {
         return userService.register(dto);   }
 
     @PostMapping("/login")
-    public String login(@RequestBody UserLoginDto dto) {
+    public AuthResponseDto login(@RequestBody UserLoginDto dto) {
         return userService.login(dto);
     }
 

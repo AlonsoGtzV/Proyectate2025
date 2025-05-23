@@ -5,7 +5,7 @@ import { useTheme } from './ThemeContext'; // Asegúrate de tener este contexto
 
 const specialties = [
   "Software",
-  "Electrónica",
+  "Electronics",
 ];
 
 export default function SpecialtySelectionScreen({ navigation, route }) {

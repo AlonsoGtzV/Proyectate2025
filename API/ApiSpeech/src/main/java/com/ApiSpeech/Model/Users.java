@@ -1,10 +1,17 @@
 package com.ApiSpeech.Model;
 
 import jakarta.persistence.ElementCollection;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+
+import org.hibernate.annotations.CascadeType;
+import org.hibernate.annotations.Cascade;
+
 import java.util.List;
 
 @Entity
@@ -23,6 +30,9 @@ public class Users {
     private Integer keys;
 
     @ElementCollection
+    @CollectionTable(name = "user_unlocked_units", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "unit_id")
+    @Cascade(CascadeType.DELETE)
     private List<Integer> unlockedUnits;
 
     // Getters y setters

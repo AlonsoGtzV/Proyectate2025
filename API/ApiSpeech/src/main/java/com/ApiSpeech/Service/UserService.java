@@ -3,11 +3,12 @@ package com.ApiSpeech.Service;
 import com.ApiSpeech.Model.Users;
 import com.ApiSpeech.Dto.UserLoginDto;
 import com.ApiSpeech.Dto.UserRegisterDto;
+import com.ApiSpeech.Dto.AuthResponseDto;
 import java.util.List;
 
 public interface UserService {
-    String register(UserRegisterDto userDto);
-    String login(UserLoginDto loginDto);
+    AuthResponseDto register(UserRegisterDto userDto);
+    AuthResponseDto login(UserLoginDto loginDto);
     List<Users> getAll();
     Users getById(Long id);
     Users update(Users user);

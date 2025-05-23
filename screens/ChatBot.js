@@ -11,8 +11,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "./ThemeContext";
 import { useLanguage } from "./LanguageContext";
-import TypingIndicator from "../TypingIndicator";
-import { useToken } from "../TokenContext";
+import TypingIndicator from "../styles/TypingIndicator";
+import { useToken } from "../services/TokenContext";
 
 export default function ChatBot({ navigation }) {
   const [message, setMessage] = useState("");
@@ -53,7 +53,7 @@ export default function ChatBot({ navigation }) {
         .slice()
         .reverse()
         .find((msg) => msg.sender === "ai")?.text || "";
-
+    console.log(userConfig?.language, lastAIMessage)
     // Construye el prompt con contexto
     const systemPrompt = `Eres un chatbot para una app de aprendizaje de inglés técnico.
 Idioma preferido del usuario: ${userConfig?.language || "español"}.
