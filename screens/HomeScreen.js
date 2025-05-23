@@ -430,13 +430,21 @@ export default function HomeScreen({ navigation }) {
                           <Text style={styles.lessonSubtitle}>{translate('no_lessons')}</Text>
                       ) : (
                           unit.lessons.map((lesson, idx) => (
-                              <View key={lesson.id || idx} style={styles.lessonBox}>
+                              <TouchableOpacity
+                                  key={lesson.id || idx}
+                                  style={styles.lessonBox}
+                                  onPress={() =>
+                                    unit.locked
+                                      ? handleLockedUnitPress()
+                                      : navigation.navigate("Loading", { lesson })
+                                  }
+                              >
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                   {getLessonIcon(lesson.iconType)}
                                   <Text style={styles.lessonTitle}>{lesson.lessonContent.title}</Text>
                                 </View>
                                 <Text style={styles.lessonSubtitle}>{lesson.lessonContent.text}</Text>
-                              </View>
+                              </TouchableOpacity>
                           ))
                       )}
                     </View>
