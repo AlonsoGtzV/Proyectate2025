@@ -25,7 +25,8 @@ export default function UserScreen({ navigation }) {
   const { darkMode, toggleTheme } = useTheme();
   const { language, setLanguage, translate, isLoading } = useLanguage();
 
-  const {localUser, setLocalUser} = useState({username: '', email: '', englishLevel: ''});
+  const [localUser, setLocalUser] = useState({ username: '', email: '', englishLevel: '' });
+
   const { userInfo } = useUser();
   const [englishLevel, setEnglishLevel] = useState('');
   const [isLanguageModalVisible, setLanguageModalVisible] = useState(false);
