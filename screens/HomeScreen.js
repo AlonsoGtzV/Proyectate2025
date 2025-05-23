@@ -14,7 +14,7 @@ import { Entypo, MaterialIcons, Ionicons } from "@expo/vector-icons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from './ThemeContext';
 import { useLanguage } from './LanguageContext';
-import { useToken } from "../TokenContext";
+import { useToken } from "../services/TokenContext";
 
 export default function HomeScreen({ navigation }) {
   const [units, setUnits] = useState([]);
@@ -27,77 +27,37 @@ export default function HomeScreen({ navigation }) {
   const { width, height } = Dimensions.get('window');
   const { token } = useToken();
 
+  const baseUnitsByArea = {
+    Software: [
+      { id: 1, unitTitle: translate('unit_1_title_software') },
+      { id: 2, unitTitle: translate('unit_2_title_software') },
+      { id: 3, unitTitle: translate('unit_3_title_software') },
+    ],
+    Electronics: [
+      { id: 1, unitTitle: translate('unit_1_title_electronics') },
+      { id: 2, unitTitle: translate('unit_2_title_electronics') },
+      { id: 3, unitTitle: translate('unit_3_title_electronics') },
+    ],
+  };
   // Datos estáticos de respaldo (del primer archivo)
   const fallbackUnits = [
     {
       id: 1,
-      unitTitle: translate('unit_1_title'),
+      unitTitle: translate('unit_1_title_software'),
       locked: false,
-      lessons: [
-        {
-          lessonContent: {
-            title: translate('lesson_1_1'),
-            subtitle: translate('lesson_1_1_sub'),
-          },
-          iconType: 'book',
-        },
-        {
-          lessonContent: {
-            title: translate('lesson_1_2'),
-            subtitle: translate('lesson_1_2_sub'),
-          },
-          iconType: 'person',
-        },
-        {
-          lessonContent: {
-            title: translate('lesson_1_3'),
-            subtitle: translate('lesson_1_3_sub'),
-          },
-          iconType: 'edit',
-        },
-        {
-          lessonContent: {
-            title: translate('lesson_1_4'),
-            subtitle: translate('lesson_1_4_sub'),
-          },
-          iconType: 'key',
-        },
-      ],
+      lessons: [],
     },
     {
       id: 2,
-      unitTitle: translate('unit_2_title'),
+      unitTitle: translate('unit_2_title_software'),
       locked: true,
-      lessons: [
-        {
-          lessonContent: {
-            title: translate('lesson_2_1'),
-            subtitle: translate('lesson_2_1_sub'),
-          },
-          iconType: 'code-slash',
-        },
-        {
-          lessonContent: {
-            title: translate('lesson_2_2'),
-            subtitle: translate('lesson_2_2_sub'),
-          },
-          iconType: 'developer-mode',
-        },
-        {
-          lessonContent: {
-            title: translate('lesson_2_3'),
-            subtitle: translate('lesson_2_3_sub'),
-          },
-          iconType: 'rocket',
-        },
-        {
-          lessonContent: {
-            title: translate('lesson_2_4'),
-            subtitle: translate('lesson_2_4_sub'),
-          },
-          iconType: 'key',
-        },
-      ],
+      lessons: [],
+    },
+    {
+      id: 3,
+      unitTitle: translate('unit_3_title_software'),
+      locked: true,
+      lessons: [],
     },
   ];
 
@@ -108,68 +68,56 @@ export default function HomeScreen({ navigation }) {
         setLoading(true);
         const userId = await AsyncStorage.getItem('userId');
         if (!userId || !token) {
-          // Si no hay usuario o token, usar datos estáticos
           setUnits(fallbackUnits);
           setLoading(false);
           return;
         }
 
-        // 1. Obtener usuario
+        // Obtener usuario
         const userRes = await fetch(`http://10.0.2.2:8080/api/users/${userId}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
-
-        if (!userRes.ok) {
-          throw new Error('Error al obtener usuario');
-        }
-
+        if (!userRes.ok) throw new Error('Error al obtener usuario');
         const user = await userRes.json();
 
-        // 2. Armar filtros según usuario
+        const unlockedUnits = user.unlockedUnits;
+
+        // Selecciona las unidades base según el área
+        const area = user.specificArea || "Software";
+        const baseUnits = baseUnitsByArea[area] || baseUnitsByArea.Software;
+
+        // Obtener lecciones
         const filters = {
-          englishLevel: user.englishLevel,
           languagePreference: user.languagePreference,
           specificArea: user.specificArea,
-          professionalismLevel: user.professionalismLevel
         };
-
-        // 3. Obtener lecciones
         const params = new URLSearchParams(filters).toString();
         const lessonsRes = await fetch(`http://10.0.2.2:8080/api/lessons/filter?${params}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
+        if (!lessonsRes.ok) throw new Error('Error al obtener lecciones');
+        const lessons = await lessonsRes.json();
 
-        if (!lessonsRes.ok) {
-          throw new Error('Error al obtener lecciones');
-        }
+        const lessonsByUnit = {};
+        lessons.forEach(lesson => {
+          const unitId = lesson.unit || 1;
+          if (!lessonsByUnit[unitId]) lessonsByUnit[unitId] = [];
+          lessonsByUnit[unitId].push(lesson);
+        });
 
-        const data = await lessonsRes.json();
-
-        // 4. Procesar datos y asegurar estructura correcta
-        const processedUnits = data.map((unit, index) => ({
+        const processedUnits = baseUnits.map((unit) => ({
           ...unit,
-          id: unit.id || index + 1,
-          locked: unit.locked !== undefined ? unit.locked : index > 0, // Primera unidad desbloqueada por defecto
-          lessons: unit.lessons.map(lesson => ({
-            ...lesson,
-            lessonContent: lesson.lessonContent || {
-              title: lesson.title || 'Lección sin título',
-              subtitle: lesson.subtitle || 'Sin descripción'
-            },
-            iconType: lesson.iconType || 'book'
-          }))
+          locked: !unlockedUnits.includes(unit.id),
+          lessons: lessonsByUnit[unit.id] || [],
         }));
 
         setUnits(processedUnits);
       } catch (error) {
-        console.error('Error al cargar datos:', error);
-        // En caso de error, usar datos estáticos
         setUnits(fallbackUnits);
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [token, translate]);
 
@@ -181,7 +129,6 @@ export default function HomeScreen({ navigation }) {
     Alert.alert(
         translate('locked_unit_alert'),
         translate('locked_unit_message'),
-        [{ text: translate('understood'), style: "default" }]
     );
   };
 
@@ -453,66 +400,45 @@ export default function HomeScreen({ navigation }) {
         </View>
 
         {/* Unidades */}
-        <ScrollView style={[styles.lessonContainer, dynamicStyles.lessonContainer]}>
+        <ScrollView style={styles.lessonContainer}>
           {units.map((unit, unitIndex) => (
-              <View key={unit.id || unitIndex}>
+              <View key={unit.id} style={styles.lessonBoxContainer}>
                 <TouchableOpacity
                     style={[
                       styles.activeUnitHeader,
-                      dynamicStyles.activeUnitHeader,
                       unit.locked && { opacity: 0.5 },
                     ]}
-                    onPress={() => toggleUnit(unitIndex)}
+                    onPress={() => unit.locked ? handleLockedUnitPress() : setExpandedUnit(expandedUnit === unitIndex ? null : unitIndex)}
                 >
-                  <Text style={[styles.unitTitle, dynamicStyles.unitTitle]}>
+                  <Text style={styles.unitTitle}>
                     {unit.unitTitle}
                   </Text>
-
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                     {unit.locked && (
-                        <Ionicons name="lock-closed" size={20} color={dynamicStyles.unitTitle.color} />
+                        <Ionicons name="lock-closed" size={20} color="#fff" />
                     )}
                     <Entypo
                         name={expandedUnit === unitIndex ? "chevron-up" : "chevron-down"}
                         size={20}
-                        color={dynamicStyles.unitTitle.color}
+                        color="#fff"
                     />
                   </View>
                 </TouchableOpacity>
-
-                {expandedUnit === unitIndex && (
-                    <View style={styles.lessonBoxContainer}>
-                      {unit.lessons.map((lesson, lessonIndex) => (
-                          <TouchableOpacity
-                              key={lessonIndex}
-                              style={[
-                                styles.lessonBox,
-                                dynamicStyles.lessonBox,
-                                unit.locked && { opacity: 0.5 }
-                              ]}
-                              onPress={() =>
-                                  unit.locked
-                                      ? handleLockedUnitPress()
-                                      : navigation.navigate("Loading", { lesson })
-                              }
-                          >
-                            <View style={styles.lessonRow}>
-                              <Text style={[styles.lessonTitle, dynamicStyles.lessonTitle]}>
-                                {lesson.lessonContent.title}
-                              </Text>
-                              {unit.locked ? (
-                                  <Ionicons name="lock-closed" size={20} color={dynamicStyles.lessonTitle.color} />
-                              ) : (
-                                  getLessonIcon(lesson.iconType, dynamicStyles.lessonTitle.color)
-                              )}
-                            </View>
-                            {lesson.lessonContent.subtitle && (
-                                <Text style={[styles.lessonSubtitle, dynamicStyles.lessonSubtitle]}>
-                                  {lesson.lessonContent.subtitle}
-                                </Text>
-                            )}
-                          </TouchableOpacity>
-                      ))}
+                {!unit.locked && expandedUnit === unitIndex && (
+                    <View>
+                      {unit.lessons.length === 0 ? (
+                          <Text style={styles.lessonSubtitle}>{translate('no_lessons')}</Text>
+                      ) : (
+                          unit.lessons.map((lesson, idx) => (
+                              <View key={lesson.id || idx} style={styles.lessonBox}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                  {getLessonIcon(lesson.iconType)}
+                                  <Text style={styles.lessonTitle}>{lesson.lessonContent.title}</Text>
+                                </View>
+                                <Text style={styles.lessonSubtitle}>{lesson.lessonContent.text}</Text>
+                              </View>
+                          ))
+                      )}
                     </View>
                 )}
               </View>

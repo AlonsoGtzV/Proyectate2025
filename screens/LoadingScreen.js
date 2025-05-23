@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, StyleSheet, ActivityIndicator } from 'react-native';
 import { useTheme } from './ThemeContext';
 import { useLanguage } from './LanguageContext';
-import { useToken } from '../TokenContext';
+import { useToken } from '../services/TokenContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoadingScreen({ navigation, route }) {

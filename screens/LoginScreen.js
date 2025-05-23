@@ -10,7 +10,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLanguage } from "./LanguageContext";
 import {Animated} from 'react-native';
 import {useEffect, useRef} from 'react';
-import { useToken } from "../TokenContext";
+import { useToken } from "../services/TokenContext";
 
 export default function LoginScreen() {
   const navigation = useNavigation();
@@ -40,12 +40,11 @@ export default function LoginScreen() {
       if (!response.ok) {
         throw new Error('Usuario o contraseña incorrectos');
       }
-      const token = await response.text();
+      const { token, userId } = await response.json();
       await AsyncStorage.setItem('token', token);
+      await AsyncStorage.setItem('userId', userId.toString());
       setToken(token);
-      await AsyncStorage.setItem('userData', JSON.stringify({
-        username
-      }));
+      await AsyncStorage.setItem('userData', JSON.stringify({ username }));
       setLoading(false);
       navigation.navigate('Home'); // Cambia 'Home' por la pantalla principal de tu app
     } catch (error) {
