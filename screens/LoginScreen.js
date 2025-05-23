@@ -43,6 +43,9 @@ export default function LoginScreen() {
       const token = await response.text();
       await AsyncStorage.setItem('token', token);
       setToken(token);
+      await AsyncStorage.setItem('userData', JSON.stringify({
+        username
+      }));
       setLoading(false);
       navigation.navigate('Home'); // Cambia 'Home' por la pantalla principal de tu app
     } catch (error) {

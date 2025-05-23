@@ -5,6 +5,7 @@ import { useTheme } from './ThemeContext';
 import Slider from '@react-native-community/slider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useToken} from "../TokenContext";
+import { useUser } from './UserContext';
 
 export default function EnglishLevelSelection({ navigation, route }) {
   const {username, email, password, specificArea} = route.params || {};
@@ -12,6 +13,7 @@ export default function EnglishLevelSelection({ navigation, route }) {
   const { darkMode } = useTheme();
   const [loading, setLoading] = useState(false);
   const { setToken } = useToken();
+  const {setUserInfo} = useUser();
 
   const handleRegister = async () => {
     const levelCategory = getLevelCategory(selectedLevel);
@@ -36,6 +38,11 @@ export default function EnglishLevelSelection({ navigation, route }) {
       const token = await response.text(); // o response.json() según tu backend
       await AsyncStorage.setItem('token', token);
       setToken(token);
+      await AsyncStorage.setItem('userData', JSON.stringify({
+        username,
+        email,
+        englishLevel: levelCategory,
+      }))
       setLoading(false);
       navigation.navigate('Home');
     } catch (error) {

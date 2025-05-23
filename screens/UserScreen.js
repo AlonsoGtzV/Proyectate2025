@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -17,12 +17,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTutorial } from "./TutorialContext";
 import { useTheme } from "./ThemeContext";
 import { useLanguage } from "./LanguageContext";
+import { useUser } from "./UserContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function UserScreen({ navigation }) {
   const { resetTutorial } = useTutorial();
   const { darkMode, toggleTheme } = useTheme();
   const { language, setLanguage, translate, isLoading } = useLanguage();
 
+  const {localUser, setLocalUser} = useState({username: '', email: '', englishLevel: ''});
+  const { userInfo } = useUser();
   const [englishLevel, setEnglishLevel] = useState('');
   const [isLanguageModalVisible, setLanguageModalVisible] = useState(false);
 
@@ -35,6 +39,22 @@ export default function UserScreen({ navigation }) {
     setLanguage(lang);
     setLanguageModalVisible(false);
   };
+
+  useEffect(() => {
+    const loadUserData = async () => {
+    try {
+      const stored = await AsyncStorage.getItem('userData');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setLocalUser(parsed);
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    }
+  };
+
+  loadUserData();
+  }, []);
 
   const dynamicStyles = StyleSheet.create({
     container: {
@@ -141,18 +161,20 @@ export default function UserScreen({ navigation }) {
           {translate('personalInfo')}
         </Text>
         <TextInput 
-          placeholder={translate('name')}
+          placeholder={localUser.username}
           placeholderTextColor={dynamicStyles.placeholderText.color}
           style={[styles.input, dynamicStyles.input]} 
+          editable={false}
         />
         <TextInput 
-          placeholder={translate('email')}
+          placeholder={localUser.email}
           placeholderTextColor={dynamicStyles.placeholderText.color}
           style={[styles.input, dynamicStyles.input]} 
+          editable={false}
         />
 
         <Text style={[styles.label, dynamicStyles.label, { marginBottom: 5 }]}>
-          {translate('englishLevel')}
+          {localUser.englishLevel}
         </Text>
         <View style={[styles.pickerContainer, dynamicStyles.input]}>
           <Picker
