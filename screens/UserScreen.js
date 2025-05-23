@@ -25,7 +25,7 @@ export default function UserScreen({ navigation }) {
   const { darkMode, toggleTheme } = useTheme();
   const { language, setLanguage, translate, isLoading } = useLanguage();
 
-  const [localUser, setLocalUser] = useState({ username: '', email: '', englishLevel: '' });
+  const [localUser, setLocalUser] = useState({ username: '', email: '', englishLevel: '', specificArea: '' });
 
   const { userInfo } = useUser();
   const [englishLevel, setEnglishLevel] = useState('');
@@ -215,9 +215,10 @@ export default function UserScreen({ navigation }) {
         </TouchableOpacity>
 
         <TextInput 
-          placeholder={translate('interestArea')}
+          placeholder={localUser.specificArea}
           placeholderTextColor={dynamicStyles.placeholderText.color}
           style={[styles.input, dynamicStyles.input]} 
+          editable={false}
         />
 
         <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>

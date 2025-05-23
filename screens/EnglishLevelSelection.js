@@ -42,6 +42,7 @@ export default function EnglishLevelSelection({ navigation, route }) {
         username,
         email,
         englishLevel: levelCategory,
+        specificArea: specificArea,
       }))
       setLoading(false);
       navigation.navigate('Home');
