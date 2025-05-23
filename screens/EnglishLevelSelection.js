@@ -1,4 +1,3 @@
-// screens/LanguageSelectionScreen.jsx
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { useTheme } from './ThemeContext';
@@ -43,7 +42,9 @@ export default function EnglishLevelSelection({ navigation, route }) {
         username,
         email,
         englishLevel: levelCategory,
-      }));
+        specificArea: specificArea,
+      }))
+
       setLoading(false);
       navigation.navigate('Home');
     } catch (error) {
