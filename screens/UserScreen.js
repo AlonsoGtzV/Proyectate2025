@@ -134,6 +134,11 @@ export default function UserScreen({ navigation }) {
       marginTop: 20,
       color: darkMode ? '#ff6b6b' : 'red',
     },
+    infoText: {
+      fontSize: 16,
+      padding: 10,
+      color: darkMode ? '#E0E0E0' : '#333',
+    }
   });
 
   if (isLoading) {
@@ -345,6 +350,10 @@ export default function UserScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  infoText: {
+    fontSize: 16,
+    padding: 10,
   },
   header: {
     flexDirection: "row",
