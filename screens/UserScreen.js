@@ -161,18 +161,22 @@ export default function UserScreen({ navigation }) {
         <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
           {translate('personalInfo')}
         </Text>
-        <TextInput 
-          placeholder={localUser.username}
-          placeholderTextColor={dynamicStyles.placeholderText.color}
-          style={[styles.input, dynamicStyles.input]} 
-          editable={false}
-        />
-        <TextInput 
-          placeholder={localUser.email}
-          placeholderTextColor={dynamicStyles.placeholderText.color}
-          style={[styles.input, dynamicStyles.input]} 
-          editable={false}
-        />
+        {/* Username */}
+        <Text style={[
+          styles.input,
+          dynamicStyles.input,
+          { marginBottom: 10 }
+        ]}>
+          {localUser.username}
+        </Text>
+        {/* Email */}
+        <Text style={[
+          styles.input,
+          dynamicStyles.input,
+          { marginBottom: 10 }
+        ]}>
+          {localUser.email}
+        </Text>
 
         <Text style={[styles.label, dynamicStyles.label, { marginBottom: 5 }]}>
           {localUser.englishLevel}
@@ -214,12 +218,14 @@ export default function UserScreen({ navigation }) {
           </Text>
         </TouchableOpacity>
 
-        <TextInput 
-          placeholder={localUser.specificArea}
-          placeholderTextColor={dynamicStyles.placeholderText.color}
-          style={[styles.input, dynamicStyles.input]} 
-          editable={false}
-        />
+        {/* Specific Area */}
+        <Text style={[
+          styles.input,
+          dynamicStyles.input,
+          { marginBottom: 10 }
+        ]}>
+          {localUser.specificArea}
+        </Text>
 
         <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
           {translate('displaySettings')}
