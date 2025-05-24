@@ -18,18 +18,91 @@ import { useTutorial } from "./TutorialContext";
 import { useTheme } from "./ThemeContext";
 import { useLanguage } from "./LanguageContext";
 import { useUser } from "./UserContext";
+import {getUser, updateUserPartial} from "../services/api";
+import {useToken} from "../services/TokenContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function UserScreen({ navigation }) {
   const { resetTutorial } = useTutorial();
   const { darkMode, toggleTheme } = useTheme();
   const { language, setLanguage, translate, isLoading } = useLanguage();
-
-  const [localUser, setLocalUser] = useState({ username: '', email: '', englishLevel: '', specificArea: '' });
-
-  const { userInfo } = useUser();
+  const { token } = useToken();
+  const [user, setUser] = useState(null);
+  const [email, setEmail] = useState('');
   const [englishLevel, setEnglishLevel] = useState('');
+  const [specificArea, setSpecificArea] = useState('');
+  const [languagePreference, setLanguagePreference] = useState('');
+  const [loading, setLoading] = useState(true);
   const [isLanguageModalVisible, setLanguageModalVisible] = useState(false);
+  const [isAreaModalVisible, setAreaModalVisible] = useState(false);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      setLoading(true);
+      try {
+        const userData = await getUser(token);
+        setUser(userData);
+      } catch (e) {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
+  }, [token]);
+
+  const mapEnglishLevel = (level) => {
+    if (level === "A1" || level === "A2") return "Beginner";
+    if (level === "B1" || level === "B2") return "Intermediate";
+    if (level === "C1" || level === "C2") return "Advanced";
+    return null;
+  };
+
+  const mapLanguage = (lang) => {
+    if (lang === "es") return "es";
+    if (lang === "en" || lang === "us") return "us";
+    return null;
+  };
+
+  const mapArea = (area) => {
+    if (area === "Software") return "Software";
+    if (area === "Electronica") return "Electronics";
+    return null;
+  };
+
+  const handleSave = async () => {
+    if (!user) return;
+    const data = {
+      email: email !== '' ? email : null,
+      englishLevel: englishLevel !== '' ? englishLevel : null,
+      languagePreference: languagePreference !== '' ? languagePreference : null,
+      specificArea: specificArea !== '' ? specificArea : null,
+    };
+    setLoading(true);
+    try {
+      await updateUserPartial(token, data);
+      // Refresca los datos del usuario
+      const updatedUser = await getUserById(token);
+      setUser(updatedUser);
+      setEmail('');
+      setEnglishLevel('');
+      setLanguagePreference('');
+      setSpecificArea('');
+      alert(translate('changes_saved') || 'Cambios guardados');
+    } catch (e) {
+      alert(translate('error_saving') || 'Error al guardar');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading || !user) {
+    return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: darkMode ? '#121212' : '#EFF1EB' }}>
+          <ActivityIndicator size="large" color={darkMode ? '#BDE4E6' : '#2C5E86'} />
+        </View>
+    );
+  }
 
   const handleTutorialPress = async () => {
     await resetTutorial();
@@ -41,21 +114,7 @@ export default function UserScreen({ navigation }) {
     setLanguageModalVisible(false);
   };
 
-  useEffect(() => {
-    const loadUserData = async () => {
-    try {
-      const stored = await AsyncStorage.getItem('userData');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setLocalUser(parsed);
-      }
-    } catch (error) {
-      console.error('Error loading user data:', error);
-    }
-  };
 
-  loadUserData();
-  }, []);
 
   const dynamicStyles = StyleSheet.create({
     container: {
@@ -150,146 +209,172 @@ export default function UserScreen({ navigation }) {
   }
 
   return (
-    <View style={[styles.container, dynamicStyles.container]}>
-      <View style={[styles.header, dynamicStyles.header]}>
-        <Image
-          source={require("../assets/Synlogo.png")}
-          style={[styles.logo, { backgroundColor: '#EFF1EC' }]}
-        />
-        <Text style={[styles.headerText, dynamicStyles.headerText]}>{translate('profile')}</Text>
-      </View>
-
-      <ScrollView
-        style={styles.lessonContainer}
-        contentContainerStyle={[styles.scrollContent, dynamicStyles.scrollContent]}
-      >
-        <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
-          {translate('personalInfo')}
-        </Text>
-        <Text style={[styles.infoText, dynamicStyles.infoText]}>
-          {localUser.username}
-        </Text>
-
-        <TextInput 
-          placeholder={localUser.email}
-          placeholderTextColor={dynamicStyles.placeholderText.color}
-          style={[styles.input, dynamicStyles.input]} 
-        />
-
-        <Text style={[styles.label, dynamicStyles.label, { marginBottom: 5 }]}>
-          {localUser.englishLevel}
-        </Text>
-        <View style={[styles.pickerContainer, dynamicStyles.input]}>
-          <Picker
-            selectedValue={englishLevel}
-            onValueChange={(value) => setEnglishLevel(value)}
-            style={{ color: englishLevel ? dynamicStyles.input.color : dynamicStyles.placeholderText.color }}
-            dropdownIconColor={darkMode ? '#BDE4E6' : '#666'}
-          >
-            <Picker.Item 
-              label={translate('selectLevel')} 
-              value="" 
-              enabled={false} 
-            />
-            <Picker.Item label={translate('a1')} value="A1" />
-            <Picker.Item label={translate('a2')} value="A2" />
-            <Picker.Item label={translate('b1')} value="B1" />
-            <Picker.Item label={translate('b2')} value="B2" />
-            <Picker.Item label={translate('c1')} value="C1" />
-            <Picker.Item label={translate('c2')} value="C2" />
-          </Picker>
-        </View>
-
-        <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
-          {translate('settings')}
-        </Text>
-
-        <Text style={[styles.label, dynamicStyles.label, { marginBottom: 5 }]}>
-          {translate('interfaceLanguage')}
-        </Text>
-        <TouchableOpacity
-          style={[styles.input, dynamicStyles.input, { justifyContent: "center" }]}
-          onPress={() => setLanguageModalVisible(true)}
-        >
-          <Text style={{ color: dynamicStyles.input.color }}>
-            {language === "es" ? translate('spanish') : translate('english')}
-          </Text>
-        </TouchableOpacity>
-
-        <TextInput 
-          placeholder={localUser.specificArea}
-          placeholderTextColor={dynamicStyles.placeholderText.color}
-          style={[styles.input, dynamicStyles.input]} 
-        />
-
-        <TouchableOpacity
-          style={[styles.button, dynamicStyles.button]}
-          onPress={() => {
-            console.log("Cambios guardados")
-          }}
-        >
-          <Text style={[styles.buttonText, dynamicStyles.buttonText]}>
-            Guardar Cambios
-          </Text>
-        </TouchableOpacity>
-
-        <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
-          {translate('displaySettings')}
-        </Text>
-        <View style={styles.row}>
-          <Text style={[styles.label, dynamicStyles.label]}>
-            {translate('darkMode')}
-          </Text>
-          <Switch 
-            value={darkMode} 
-            onValueChange={toggleTheme}
-            thumbColor={darkMode ? '#2C5E86' : '#f4f3f4'}
-            trackColor={{ false: '#767577', true: '#BDE4E6' }}
+      <View style={[styles.container, { backgroundColor: darkMode ? '#121212' : '#EFF1EB' }]}>
+        {/* Header */}
+        <View style={[styles.header, { backgroundColor: darkMode ? '#1E1E1E' : '#2C5E86' }]}>
+          <Image
+              source={require("../assets/Synlogo.png")}
+              style={[styles.logo, { backgroundColor: '#EFF1EC' }]}
           />
+          <Text style={[styles.headerText, { color: darkMode ? '#E0E0E0' : 'white' }]}>{translate('profile')}</Text>
         </View>
 
-        <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
-          {translate('helpSupport')}
-        </Text>
-        <TouchableOpacity 
-          style={[styles.button, dynamicStyles.button]} 
-          onPress={handleTutorialPress}
+        {/* Contenido principal */}
+        <ScrollView
+            style={styles.lessonContainer}
+            contentContainerStyle={[styles.scrollContent, { backgroundColor: darkMode ? '#121212' : '#EFF0EB' }]}
         >
-          <Text style={[styles.buttonText, dynamicStyles.buttonText]}>
-            {translate('tutorial')}
+          <Text style={[styles.sectionTitle, { color: darkMode ? '#E0E0E0' : '#333' }]}>
+            {translate('personalInfo')}
           </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, dynamicStyles.button]}
-          onPress={() => navigation.navigate("Support")}
-        >
-          <Text style={[styles.buttonText, dynamicStyles.buttonText]}>
-            {translate('support')}
+          <Text style={[styles.infoText, { color: darkMode ? '#E0E0E0' : '#333', marginBottom: 10 }]}>
+            {user.cognitoUsername}
           </Text>
-        </TouchableOpacity>
 
-        <Modal
+          <TextInput
+              placeholder={translate('email')}
+              placeholderTextColor={darkMode ? '#999' : '#ccc'}
+              style={[styles.input, { backgroundColor: darkMode ? '#333' : '#fff', color: darkMode ? '#fff' : '#333' }]}
+              value={email !== '' ? email : user.email}
+              onChangeText={setEmail}
+          />
+
+          <Text style={[styles.label, { color: darkMode ? '#E0E0E0' : '#333', marginBottom: 5 }]}>
+            {'Select English Level'}
+          </Text>
+          <View style={{ borderWidth: 1, borderRadius: 6, marginBottom: 10, backgroundColor: darkMode ? '#333' : '#fff' }}>
+            <Picker
+                selectedValue={englishLevel}
+                onValueChange={setEnglishLevel}
+                style={{ color: englishLevel ? (darkMode ? '#fff' : '#333') : (darkMode ? '#999' : '#ccc') }}
+                dropdownIconColor={darkMode ? '#BDE4E6' : '#666'}
+            >
+              <Picker.Item label={user.englishLevel} value="" enabled={false} />
+              <Picker.Item label="A1" value="A1" />
+              <Picker.Item label="A2" value="A2" />
+              <Picker.Item label="B1" value="B1" />
+              <Picker.Item label="B2" value="B2" />
+              <Picker.Item label="C1" value="C1" />
+              <Picker.Item label="C2" value="C2" />
+            </Picker>
+          </View>
+
+          <Text style={[styles.sectionTitle, { color: darkMode ? '#E0E0E0' : '#333' }]}>
+            {translate('settings')}
+          </Text>
+
+          <Text style={[styles.label, { color: darkMode ? '#E0E0E0' : '#333', marginBottom: 5 }]}>
+            {translate('interfaceLanguage')}
+          </Text>
+          <TouchableOpacity
+              style={{ borderWidth: 1, borderRadius: 6, padding: 10, marginBottom: 10, backgroundColor: darkMode ? '#333' : '#fff' }}
+              onPress={() => setLanguageModalVisible(true)}
+          >
+            <Text style={{ color: darkMode ? '#fff' : '#333' }}>
+              {user.languagePreference === "es" ? translate('spanish') : translate('english')}
+            </Text>
+          </TouchableOpacity>
+
+
+          <TouchableOpacity
+              style={{ borderWidth: 1, borderRadius: 6, padding: 10, marginBottom: 10, backgroundColor: darkMode ? '#333' : '#fff' }}
+              onPress={() => setAreaModalVisible(true)}
+          >
+            <Text style={{ color: darkMode ? '#fff' : '#333' }}>
+              {user.specificArea === "Electronics" ? "Electronics" : "Software"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+              style={{ padding: 12, borderRadius: 6, marginBottom: 10, alignItems: "center", backgroundColor: darkMode ? '#2C5E86' : '#2C5E86' }}
+              onPress={handleSave}
+          >
+            <Text style={{ fontWeight: "bold", color: darkMode ? '#E0E0E0' : '#fff' }}>
+              {translate('save_changes') || 'Guardar Cambios'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Ajustes de visualización */}
+          <Text style={{ fontWeight: "bold", fontSize: 16, marginTop: 20, marginBottom: 10, color: darkMode ? '#E0E0E0' : '#333' }}>
+            {translate('displaySettings')}
+          </Text>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <Text style={{ fontSize: 16, fontWeight: "bold", color: darkMode ? '#E0E0E0' : '#333' }}>
+              {translate('darkMode')}
+            </Text>
+            <Switch
+                value={darkMode}
+                onValueChange={toggleTheme}
+                thumbColor={darkMode ? '#2C5E86' : '#f4f3f4'}
+                trackColor={{ false: '#767577', true: '#BDE4E6' }}
+            />
+          </View>
+
+          {/* Soporte y tutorial */}
+          <Text style={[styles.sectionTitle, { color: darkMode ? '#E0E0E0' : '#333' }]}>
+            {translate('helpSupport')}
+          </Text>
+          <TouchableOpacity
+              style={[styles.button, { backgroundColor: darkMode ? '#2C5E86' : '#2C5E86' }]}
+              onPress={handleTutorialPress}
+          >
+            <Text style={[styles.buttonText, { color: darkMode ? '#E0E0E0' : '#fff' }]}>
+              {translate('tutorial')}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+              style={[styles.button, { backgroundColor: darkMode ? '#2C5E86' : '#2C5E86' }]}
+              onPress={() => navigation.navigate("Support")}
+          >
+            <Text style={[styles.buttonText, { color: darkMode ? '#E0E0E0' : '#fff' }]}>
+              {translate('support')}
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+
+      <Modal
           animationType="slide"
           transparent={true}
           visible={isLanguageModalVisible}
           onRequestClose={() => setLanguageModalVisible(false)}
-        >
-          <View style={modalStyles.modalContainer}>
-            <View style={modalStyles.modalContent}>
-              <Text style={modalStyles.modalTitle}>{translate('selectLanguage')}</Text>
-              <TouchableOpacity onPress={() => handleLanguageChange("es")}>
-                <Text style={modalStyles.modalOption}>{translate('spanish')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleLanguageChange("en")}>
-                <Text style={modalStyles.modalOption}>{translate('english')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setLanguageModalVisible(false)}>
-                <Text style={modalStyles.modalCancel}>{translate('cancel')}</Text>
-              </TouchableOpacity>
-            </View>
+      >
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
+          <View style={{ backgroundColor: darkMode ? '#333' : '#fff', padding: 20, borderRadius: 10, width: "80%", alignItems: "center" }}>
+            <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 20, color: darkMode ? '#E0E0E0' : '#333' }}>{translate('selectLanguage')}</Text>
+            <TouchableOpacity onPress={() => { setLanguagePreference("es"); setLanguageModalVisible(false); }}>
+              <Text style={{ fontSize: 16, marginVertical: 10, color: darkMode ? '#E0E0E0' : '#333' }}>{translate('spanish')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => { setLanguagePreference("us"); setLanguageModalVisible(false); }}>
+              <Text style={{ fontSize: 16, marginVertical: 10, color: darkMode ? '#E0E0E0' : '#333' }}>{translate('english')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setLanguageModalVisible(false)}>
+              <Text style={{ marginTop: 20, color: darkMode ? '#ff6b6b' : 'red' }}>{translate('cancel')}</Text>
+            </TouchableOpacity>
           </View>
-        </Modal>
-      </ScrollView>
+        </View>
+      </Modal>
+
+      <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isAreaModalVisible}
+          onRequestClose={() => setAreaModalVisible(false)}
+      >
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
+          <View style={{ backgroundColor: darkMode ? '#333' : '#fff', padding: 20, borderRadius: 10, width: "80%", alignItems: "center" }}>
+            <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 20, color: darkMode ? '#E0E0E0' : '#333' }}>Selecciona área</Text>
+            <TouchableOpacity onPress={() => { setSpecificArea("Software"); setAreaModalVisible(false); }}>
+              <Text style={{ fontSize: 16, marginVertical: 10, color: darkMode ? '#E0E0E0' : '#333' }}>Software</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => { setSpecificArea("Electronics"); setAreaModalVisible(false); }}>
+              <Text style={{ fontSize: 16, marginVertical: 10, color: darkMode ? '#E0E0E0' : '#333' }}>Electronics</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setAreaModalVisible(false)}>
+              <Text style={{ marginTop: 20, color: darkMode ? '#ff6b6b' : 'red' }}>{translate('cancel')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <View style={[styles.footer, dynamicStyles.footer]}>
         <TouchableOpacity
