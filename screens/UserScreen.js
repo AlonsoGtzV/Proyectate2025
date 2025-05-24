@@ -166,7 +166,7 @@ export default function UserScreen({ navigation }) {
         <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
           {translate('personalInfo')}
         </Text>
-        <Text>
+        <Text style={[styles.infoText, dynamicStyles.infoText]}>
           {localUser.username}
         </Text>
 
