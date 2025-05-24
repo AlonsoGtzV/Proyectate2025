@@ -1,21 +1,90 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "./ThemeContext"; // Asegúrate de tener esto
 import { StatusBar } from "expo-status-bar";
+import { useLanguage } from "./LanguageContext";
+import { useToken } from "../services/TokenContext";
 
-const syllabusData = [
-  { unit: "Unit 1", topics: ["1. Introduction", "2. Basic vocabulary"] },
-  { unit: "Unit 2", topics: ["1. Grammar basics", "2. Common phrases"] },
-  { unit: "Unit 3", topics: ["1. Verbs", "2. Sentence structure"] },
-  { unit: "Unit 4", topics: ["1. Listening practice", "2. Speaking drills"] },
-  { unit: "Unit 5", topics: ["1. Reading comprehension", "2. Writing practice"] },
-  { unit: "Unit 6", topics: ["1. Review", "2. Final quiz"] },
-];
 
 export default function Syllabus({ navigation }) {
+  const [units, setUnits] = useState([]);
   const [expandedUnit, setExpandedUnit] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const { translate } = useLanguage();
   const { darkMode } = useTheme();
+  const { token } = useToken();
+
+  const baseUnitsByArea = {
+    Software: [
+      { id: 1, unitTitle: translate('unit_1_title_software') },
+      { id: 2, unitTitle: translate('unit_2_title_software') },
+      { id: 3, unitTitle: translate('unit_3_title_software') },
+    ],
+    Electronics: [
+      { id: 1, unitTitle: translate('unit_1_title_electronics') },
+      { id: 2, unitTitle: translate('unit_2_title_electronics') },
+      { id: 3, unitTitle: translate('unit_3_title_electronics') },
+    ],
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const userId = await AsyncStorage.getItem('userId');
+        if (!userId || !token) {
+          setUnits([]);
+          setLoading(false);
+          return;
+        }
+
+        // Obtener usuario
+        const userRes = await fetch(`http://10.0.2.2:8080/api/users/${userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (!userRes.ok) throw new Error('Error al obtener usuario');
+        const user = await userRes.json();
+
+        const unlockedUnits = user.unlockedUnits;
+        const area = user.specificArea || "Software";
+        const baseUnits = baseUnitsByArea[area] || baseUnitsByArea.Software;
+
+        // Obtener lecciones
+        const filters = {
+          languagePreference: user.languagePreference,
+          specificArea: user.specificArea,
+        };
+        const params = new URLSearchParams(filters).toString();
+        const lessonsRes = await fetch(`http://10.0.2.2:8080/api/lessons/filter?${params}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (!lessonsRes.ok) throw new Error('Error al obtener lecciones');
+        const lessons = await lessonsRes.json();
+
+        const lessonsByUnit = {};
+        lessons.forEach(lesson => {
+          const unitId = lesson.unit || 1;
+          if (!lessonsByUnit[unitId]) lessonsByUnit[unitId] = [];
+          lessonsByUnit[unitId].push(lesson);
+        });
+
+        const processedUnits = baseUnits.map((unit) => ({
+          ...unit,
+          locked: !unlockedUnits.includes(unit.id),
+          lessons: lessonsByUnit[unit.id] || [],
+        }));
+
+        setUnits(processedUnits);
+      } catch (error) {
+        setUnits([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [token, translate]);
 
   const toggleUnit = (index) => {
     setExpandedUnit(expandedUnit === index ? null : index);
@@ -60,6 +129,14 @@ export default function Syllabus({ navigation }) {
     },
   });
 
+  if (loading) {
+    return (
+        <View style={[styles.container, dynamicStyles.container, { flex: 1, justifyContent: 'center', alignItems: 'center' }]}>
+          <ActivityIndicator size="large" color={darkMode ? "#BDE4E6" : "#2C5E86"} />
+        </View>
+    );
+  }
+
   return (
     <View style={[styles.container, dynamicStyles.container]}>
       {/* Header */}
@@ -69,31 +146,38 @@ export default function Syllabus({ navigation }) {
       </View>
 
       {/* Lista */}
-      <FlatList
-        data={syllabusData}
-        keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={{ paddingBottom: 80 }}
-        renderItem={({ item, index }) => (
-          <View style={[styles.unitContainer, dynamicStyles.unitContainer]}>
-            <TouchableOpacity style={styles.unitHeader} onPress={() => toggleUnit(index)}>
-              <Ionicons
-                name={expandedUnit === index ? "chevron-up" : "chevron-down"}
-                size={20}
-                color={dynamicStyles.unitTitle.color}
-                style={{ marginRight: 10 }}
-              />
-              <Text style={[styles.unitTitle, dynamicStyles.unitTitle]}>{item.unit}</Text>
-            </TouchableOpacity>
-            {expandedUnit === index && (
-              <View style={[styles.topicList, dynamicStyles.topicList]}>
-                {item.topics.map((topic, i) => (
-                  <Text key={i} style={[styles.topicText, dynamicStyles.topicText]}>{topic}</Text>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
-      />
+      <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
+        {units.map((unit, index) => (
+            <View key={unit.id} style={[styles.unitContainer, dynamicStyles.unitContainer]}>
+              <TouchableOpacity style={styles.unitHeader} onPress={() => toggleUnit(index)}>
+                <Ionicons
+                    name={expandedUnit === index ? "chevron-up" : "chevron-down"}
+                    size={20}
+                    color={dynamicStyles.unitTitle.color}
+                    style={{ marginRight: 10 }}
+                />
+                <Text style={[styles.unitTitle, dynamicStyles.unitTitle]}>{unit.unitTitle}</Text>
+                {unit.locked && (
+                    <Ionicons name="lock-closed" size={18} color="#888" style={{ marginLeft: 10 }} />
+                )}
+              </TouchableOpacity>
+              {expandedUnit === index && (
+                  <View style={[styles.topicList, dynamicStyles.topicList]}>
+                    {unit.lessons.length === 0 ? (
+                        <Text style={[styles.topicText, dynamicStyles.topicText]}>{translate('no_lessons')}</Text>
+                    ) : (
+                        unit.lessons.map((lesson, i) => (
+                            <View key={lesson.id || i} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                              <Ionicons name="book" size={18} color="#fff" style={{ marginRight: 8 }} />
+                              <Text style={[styles.topicText, dynamicStyles.topicText]}>{lesson.lessonContent?.title || translate('lesson')}</Text>
+                            </View>
+                        ))
+                    )}
+                  </View>
+              )}
+            </View>
+        ))}
+      </ScrollView>
 
       {/* Footer */}
       <View style={[styles.footer, dynamicStyles.footer]}>
