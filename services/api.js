@@ -19,3 +19,18 @@ export async function getLessons(token, filters) {
   if (!res.ok) throw new Error('Error al obtener lecciones');
   return await res.json();
 }
+
+export async function updateUserPartial(token, data) {
+  const userId = await AsyncStorage.getItem('userId');
+  if (!userId || !token) return null;
+  const res = await fetch(`http://10.0.2.2:8080/api/users/${userId}/update-partial`, {
+    method: 'PATCH',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Error al actualizar usuario');
+  return await res.json();
+}
