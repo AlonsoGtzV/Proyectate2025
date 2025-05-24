@@ -7,11 +7,10 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  TextInput,
   Switch,
   Modal,
-  ActivityIndicator,
-  TextInput,
-  Alert
+  ActivityIndicator
 } from "react-native";
 import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from "@expo/vector-icons";
@@ -27,8 +26,8 @@ export default function UserScreen({ navigation }) {
   const { language, setLanguage, translate, isLoading } = useLanguage();
 
   const [localUser, setLocalUser] = useState({ username: '', email: '', englishLevel: '', specificArea: '' });
-  const [email, setEmail] = useState('');
-  const [specificArea, setSpecificArea] = useState('');
+
+  const { userInfo } = useUser();
   const [englishLevel, setEnglishLevel] = useState('');
   const [isLanguageModalVisible, setLanguageModalVisible] = useState(false);
 
@@ -44,19 +43,18 @@ export default function UserScreen({ navigation }) {
 
   useEffect(() => {
     const loadUserData = async () => {
-      try {
-        const stored = await AsyncStorage.getItem('userData');
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          setLocalUser(parsed);
-          setEmail(parsed.email || '');
-          setSpecificArea(parsed.specificArea || '');
-        }
-      } catch (error) {
-        console.error('Error loading user data:', error);
+    try {
+      const stored = await AsyncStorage.getItem('userData');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setLocalUser(parsed);
       }
-    };
-    loadUserData();
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    }
+  };
+
+  loadUserData();
   }, []);
 
   const dynamicStyles = StyleSheet.create({
@@ -105,142 +103,38 @@ export default function UserScreen({ navigation }) {
     footerLogo: {
       borderColor: darkMode ? '#555' : '#BDE4E6',
     },
-    infoText: {
+  });
+
+  const modalStyles = StyleSheet.create({
+    modalContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "rgba(0,0,0,0.5)",
+    },
+    modalContent: {
+      backgroundColor: darkMode ? '#333' : '#fff',
+      padding: 20,
+      borderRadius: 10,
+      width: "80%",
+      alignItems: "center",
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      marginBottom: 20,
       color: darkMode ? '#E0E0E0' : '#333',
     },
-  });
-
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    header: {
-      flexDirection: "row",
-      alignItems: "center",
-      padding: 15,
-      paddingTop: 50,
-      justifyContent: "center",
-      gap: 10,
-      width: "100%",
-      marginBottom: 10,
-    },
-    logo: {
-      width: 50,
-      height: 50,
-      marginRight: 10,
-      resizeMode: "contain",
-      borderRadius: 25,
-    },
-    headerText: {
-      fontSize: 22,
-      fontWeight: "bold",
-    },
-    footer: {
-      height: 50,
-      position: "relative",
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    footerLogo: {
-      width: 80,
-      height: 80,
-      resizeMode: "contain",
-      borderRadius: 40,
-      borderWidth: 2,
-    },
-    footerLogoButton: {
-      position: "absolute",
-      top: -40,
-      left: "50%",
-      transform: [{ translateX: -40 }],
-      borderRadius: 40,
-      borderWidth: 2,
-      width: 80,
-      height: 80,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    footerIcon1: {
-      position: "absolute",
-      left: 20,
-      bottom: 10,
-    },
-    footerIcon2: {
-      position: "absolute",
-      left: 100,
-      bottom: 10,
-    },
-    footerIcon3: {
-      position: "absolute",
-      right: 100,
-      bottom: 10,
-    },
-    footerIcon4: {
-      position: "absolute",
-      right: 20,
-      bottom: 10,
-    },
-    lessonContainer: {
-      flex: 1,
-      paddingHorizontal: 20,
-      marginTop: 20,
-    },
-    scrollContent: {
-      paddingBottom: 100,
-    },
-    sectionTitle: {
-      fontWeight: "bold",
+    modalOption: {
       fontSize: 16,
+      marginVertical: 10,
+      color: darkMode ? '#E0E0E0' : '#333',
+    },
+    modalCancel: {
       marginTop: 20,
-      marginBottom: 10,
-    },
-    input: {
-      borderWidth: 1,
-      borderRadius: 6,
-      padding: 10,
-      marginBottom: 10,
-    },
-    row: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 10,
-    },
-    label: {
-      fontSize: 16,
-      fontWeight: "bold",
-    },
-    button: {
-      padding: 12,
-      borderRadius: 6,
-      marginBottom: 10,
-      alignItems: "center",
-    },
-    buttonText: {
-      fontWeight: "bold",
-    },
-    pickerContainer: {
-      borderWidth: 1,
-      borderRadius: 6,
-      marginBottom: 10,
-      justifyContent: 'center',
+      color: darkMode ? '#ff6b6b' : 'red',
     },
   });
-
-  const handleSave = async () => {
-    try {
-      const updatedUser = { ...localUser, email, specificArea };
-      await AsyncStorage.setItem('userData', JSON.stringify(updatedUser));
-      setLocalUser(updatedUser);
-      Alert.alert('Datos actualizados', 'Tus cambios han sido guardados.');
-    } catch (error) {
-      Alert.alert('Error', 'No se pudieron guardar los cambios.');
-    }
-  };
-
-  const hasChanges =
-    email !== localUser.email ||
-    specificArea !== localUser.specificArea;
 
   if (isLoading) {
     return (
@@ -267,40 +161,15 @@ export default function UserScreen({ navigation }) {
         <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
           {translate('personalInfo')}
         </Text>
-        {/* Username solo lectura */}
-        <Text style={[styles.infoText, dynamicStyles.infoText]}>
-          {localUser.username || '-'}
+        <Text>
+          {localUser.username}
         </Text>
-        {/* Email editable */}
-        <TextInput
-          style={[styles.input, dynamicStyles.input]}
-          value={email}
-          onChangeText={setEmail}
-          placeholder={translate('email')}
-          placeholderTextColor={dynamicStyles.placeholderText.color}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-        {/* Specific Area editable */}
-        <TextInput
-          style={[styles.input, dynamicStyles.input]}
-          value={specificArea}
-          onChangeText={setSpecificArea}
-          placeholder={translate('interestArea')}
-          placeholderTextColor={dynamicStyles.placeholderText.color}
-        />
 
-        {/* Botón guardar cambios */}
-        {hasChanges && (
-          <TouchableOpacity
-            style={[styles.button, dynamicStyles.button]}
-            onPress={handleSave}
-          >
-            <Text style={[styles.buttonText, dynamicStyles.buttonText]}>
-              Guardar cambios
-            </Text>
-          </TouchableOpacity>
-        )}
+        <TextInput 
+          placeholder={localUser.email}
+          placeholderTextColor={dynamicStyles.placeholderText.color}
+          style={[styles.input, dynamicStyles.input]} 
+        />
 
         <Text style={[styles.label, dynamicStyles.label, { marginBottom: 5 }]}>
           {localUser.englishLevel}
@@ -342,10 +211,22 @@ export default function UserScreen({ navigation }) {
           </Text>
         </TouchableOpacity>
 
-        {/* Specific Area */}
-        <Text style={[styles.infoText, dynamicStyles.infoText]}>
-          {localUser.specificArea || '-'}
-        </Text>
+        <TextInput 
+          placeholder={localUser.specificArea}
+          placeholderTextColor={dynamicStyles.placeholderText.color}
+          style={[styles.input, dynamicStyles.input]} 
+        />
+
+        <TouchableOpacity
+          style={[styles.button, dynamicStyles.button]}
+          onPress={() => {
+            console.log("Cambios guardados")
+          }}
+        >
+          <Text style={[styles.buttonText, dynamicStyles.buttonText]}>
+            Guardar Cambios
+          </Text>
+        </TouchableOpacity>
 
         <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
           {translate('displaySettings')}
@@ -461,33 +342,119 @@ export default function UserScreen({ navigation }) {
   );
 }
 
-const modalStyles = StyleSheet.create({
-  modalContainer: {
+const styles = StyleSheet.create({
+  container: {
     flex: 1,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 15,
+    paddingTop: 50,
+    justifyContent: "center",
+    gap: 10,
+    width: "100%",
+    marginBottom: 10,
+  },
+  logo: {
+    width: 50,
+    height: 50,
+    marginRight: 10,
+    resizeMode: "contain",
+    borderRadius: 25,
+  },
+  headerText: {
+    fontSize: 22,
+    fontWeight: "bold",
+  },
+  footer: {
+    height: 50,
+    position: "relative",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
   },
-  modalContent: {
-    backgroundColor: darkMode ? '#333' : '#fff',
-    padding: 20,
-    borderRadius: 10,
-    width: "80%",
+  footerLogo: {
+    width: 80,
+    height: 80,
+    resizeMode: "contain",
+    borderRadius: 40,
+    borderWidth: 2,
+  },
+  footerLogoButton: {
+    position: "absolute",
+    top: -40,
+    left: "50%",
+    transform: [{ translateX: -40 }],
+    borderRadius: 40,
+    borderWidth: 2,
+    width: 80,
+    height: 80,
+    justifyContent: "center",
     alignItems: "center",
   },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 20,
-    color: darkMode ? '#E0E0E0' : '#333',
+  footerIcon1: {
+    position: "absolute",
+    left: 20,
+    bottom: 10,
   },
-  modalOption: {
-    fontSize: 16,
-    marginVertical: 10,
-    color: darkMode ? '#E0E0E0' : '#333',
+  footerIcon2: {
+    position: "absolute",
+    left: 100,
+    bottom: 10,
   },
-  modalCancel: {
+  footerIcon3: {
+    position: "absolute",
+    right: 100,
+    bottom: 10,
+  },
+  footerIcon4: {
+    position: "absolute",
+    right: 20,
+    bottom: 10,
+  },
+  lessonContainer: {
+    flex: 1,
+    paddingHorizontal: 20,
     marginTop: 20,
-    color: darkMode ? '#ff6b6b' : 'red',
+  },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+  sectionTitle: {
+    fontWeight: "bold",
+    fontSize: 16,
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: 6,
+    padding: 10,
+    marginBottom: 10,
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  button: {
+    padding: 12,
+    borderRadius: 6,
+    marginBottom: 10,
+    alignItems: "center",
+  },
+  buttonText: {
+    fontWeight: "bold",
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderRadius: 6,
+    marginBottom: 10,
+    justifyContent: 'center',
   },
 });
