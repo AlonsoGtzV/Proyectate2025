@@ -79,18 +79,19 @@ export default function UserScreen({ navigation }) {
       specificArea: specificArea !== '' ? specificArea : null,
     };
     setLoading(true);
+    setLanguage(languagePreference);
     try {
       await updateUserPartial(token, data);
       // Refresca los datos del usuario
-      const updatedUser = await getUserById(token);
+      const updatedUser = await getUser(token);
       setUser(updatedUser);
       setEmail('');
       setEnglishLevel('');
       setLanguagePreference('');
       setSpecificArea('');
-      alert(translate('changes_saved') || 'Cambios guardados');
+      alert(translate('changes saved') || 'Cambios guardados');
     } catch (e) {
-      alert(translate('error_saving') || 'Error al guardar');
+      alert(translate('error saving') || 'Error al guardar');
     } finally {
       setLoading(false);
     }
@@ -268,7 +269,10 @@ export default function UserScreen({ navigation }) {
           </Text>
           <TouchableOpacity
               style={{ borderWidth: 1, borderRadius: 6, padding: 10, marginBottom: 10, backgroundColor: darkMode ? '#333' : '#fff' }}
-              onPress={() => setLanguageModalVisible(true)}
+              onPress={async () => {
+                setLanguagePreference(languagePreference);
+                setLanguageModalVisible(true);
+              }}
           >
             <Text style={{ color: darkMode ? '#fff' : '#333' }}>
               {user.languagePreference === "es" ? translate('spanish') : translate('english')}
@@ -290,7 +294,7 @@ export default function UserScreen({ navigation }) {
               onPress={handleSave}
           >
             <Text style={{ fontWeight: "bold", color: darkMode ? '#E0E0E0' : '#fff' }}>
-              {translate('save_changes') || 'Guardar Cambios'}
+              {translate('save changes') || 'Guardar Cambios'}
             </Text>
           </TouchableOpacity>
 
