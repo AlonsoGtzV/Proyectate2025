@@ -4,6 +4,7 @@ import com.ApiSpeech.Dto.AuthResponseDto;
 import com.ApiSpeech.Dto.UserLoginDto;
 import com.ApiSpeech.Dto.UserRegisterDto;
 import com.ApiSpeech.Model.Users;
+import com.ApiSpeech.Model.CompletedLesson;
 import com.ApiSpeech.Repository.UserRepository;
 import com.ApiSpeech.Util.JwtUtil;
 import com.ApiSpeech.Exception.UserNotFoundException;
@@ -240,5 +241,22 @@ public class UserServiceImpl implements UserService {
         } catch (CognitoIdentityProviderException e) {
             throw new RuntimeException("Error al actualizar atributos en Cognito: " + e.awsErrorDetails().errorMessage());
         }
+    }
+
+    @Override
+    public Users addCompletedLesson(Long userId, String lessonId, String lessonName) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Usuario con ID " + userId + " no encontrado."));
+
+        if (user.getCompletedLessons() == null) {
+            user.setCompletedLessons(new ArrayList<>());
+        }
+
+        CompletedLesson lesson = new CompletedLesson();
+        lesson.setLessonId(lessonId);
+        lesson.setLessonName(lessonName);
+
+        user.getCompletedLessons().add(lesson);
+        return userRepository.save(user);
     }
 }

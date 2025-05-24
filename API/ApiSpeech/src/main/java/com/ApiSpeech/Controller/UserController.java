@@ -87,4 +87,8 @@ public class UserController {
         return userService.update(user);
     }
 
+    @PutMapping("/{id}/complete-lesson")
+    public Users completeLesson(@PathVariable Long id, @RequestParam String lessonId, @RequestParam String lessonName) {
+        return userService.addCompletedLesson(id, lessonId, lessonName);
+    }
 }

@@ -35,6 +35,10 @@ public class Users {
     @Cascade(CascadeType.DELETE)
     private List<Integer> unlockedUnits;
 
+    @ElementCollection
+    @CollectionTable(name = "user_completed_lessons", joinColumns = @JoinColumn(name = "user_id"))
+    private List<CompletedLesson> completedLessons;
+
     // Getters y setters
 
     public Long getId() {
@@ -99,5 +103,14 @@ public class Users {
 
     public void setUnlockedUnits(List<Integer> unlockedUnits) {
         this.unlockedUnits = unlockedUnits;
+    }
+
+    // Dentro de la clase Users
+    public List<CompletedLesson> getCompletedLessons() {
+        return completedLessons;
+    }
+
+    public void setCompletedLessons(List<CompletedLesson> completedLessons) {
+        this.completedLessons = completedLessons;
     }
 }
