@@ -44,6 +44,8 @@ export default function UserScreen({ navigation }) {
       try {
         const userData = await getUser(token);
         setUser(userData);
+        setEnglishLevel(userData.englishLevel || '')
+        setSpecificArea(userData.specificArea || '')
       } catch (e) {
         setUser(null);
       } finally {
@@ -249,7 +251,7 @@ export default function UserScreen({ navigation }) {
     style={{ color: englishLevel ? dynamicStyles.input.color : dynamicStyles.placeholderText.color }}
     dropdownIconColor={darkMode ? '#BDE4E6' : '#666'}
   >
-    <Picker.Item label={user.englishLevel} value="" enabled={false} />
+    <Picker.Item label={englishLevel || translate('selectLevel')} value="" enabled={false} />
     <Picker.Item label={translate('a1')} value="A1" />
     <Picker.Item label={translate('a2')} value="A2" />
     <Picker.Item label={translate('b1')} value="B1" />
@@ -280,13 +282,14 @@ export default function UserScreen({ navigation }) {
 
 
         <TouchableOpacity
-            style={[styles.input, dynamicStyles.input, { justifyContent: "center" }]}
-            onPress={() => setAreaModalVisible(true)}
-        >
-          <Text style={{ color: dynamicStyles.input.color }}>
-            {user.specificArea === "Electronics" ? "Electronics" : "Software"}
-          </Text>
-        </TouchableOpacity>
+  style={[styles.input, dynamicStyles.input, { justifyContent: "center" }]}
+  onPress={() => setAreaModalVisible(true)}
+>
+  <Text style={{ color: dynamicStyles.input.color }}>
+    {specificArea || translate('selectArea')}
+  </Text>
+</TouchableOpacity>
+
 
 
         <TouchableOpacity
