@@ -18,14 +18,14 @@ export default function Syllabus({ navigation }) {
 
   const baseUnitsByArea = {
     Software: [
-      { id: 1, unitTitle: translate('unit_1_title_software') },
-      { id: 2, unitTitle: translate('unit_2_title_software') },
-      { id: 3, unitTitle: translate('unit_3_title_software') },
+      { id: 1, unitTitle: translate('home.unit_1_title_software') },
+      { id: 2, unitTitle: translate('home.unit_2_title_software') },
+      { id: 3, unitTitle: translate('home.unit_3_title_software') },
     ],
     Electronics: [
-      { id: 1, unitTitle: translate('unit_1_title_electronics') },
-      { id: 2, unitTitle: translate('unit_2_title_electronics') },
-      { id: 3, unitTitle: translate('unit_3_title_electronics') },
+      { id: 1, unitTitle: translate('home.unit_1_title_electronics') },
+      { id: 2, unitTitle: translate('home.unit_2_title_electronics') },
+      { id: 3, unitTitle: translate('home.unit_3_title_electronics') },
     ],
   };
 

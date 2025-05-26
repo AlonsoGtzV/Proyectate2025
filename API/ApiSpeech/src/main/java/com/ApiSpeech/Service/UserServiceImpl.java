@@ -252,11 +252,27 @@ public class UserServiceImpl implements UserService {
             user.setCompletedLessons(new ArrayList<>());
         }
 
+        // Verificar si la lección ya está completada
+        boolean lessonExists = user.getCompletedLessons().stream()
+                .anyMatch(lesson -> lesson.getLessonId().equals(lessonId));
+
+        if (lessonExists) {
+            return user; // Retorna el usuario sin guardar cambios
+        }
+
+        // Agregar la lección si no está repetida
         CompletedLesson lesson = new CompletedLesson();
         lesson.setLessonId(lessonId);
         lesson.setLessonName(lessonName);
 
         user.getCompletedLessons().add(lesson);
         return userRepository.save(user);
+    }
+    
+    @Override
+    public int getUserKeys(Long userId) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Usuario con ID " + userId + " no encontrado."));
+        return user.getKeys() != null ? user.getKeys() : 0;
     }
 }

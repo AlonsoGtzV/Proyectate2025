@@ -181,7 +181,7 @@ useEffect(() => {
       </View>
 
       <TouchableOpacity>
-        <Text style={[styles.forgotPassword, dynamicStyles.forgotPassword]}>{translate("forgotPassword")}</Text>
+        <Text style={[styles.forgotPassword, dynamicStyles.forgotPassword]}>{translate("auth.forgotPassword")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity 
@@ -196,9 +196,9 @@ useEffect(() => {
         <View style={[styles.separatorLine, dynamicStyles.separatorLine]} />
       </View>
 
-      <Text style={[styles.registerText, dynamicStyles.registerText]}>{translate("newUser")}</Text>
+      <Text style={[styles.registerText, dynamicStyles.registerText]}>{translate("auth.newUser")}</Text>
       <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-        <Text style={[styles.registeruser, dynamicStyles.registeruser]}>{translate("signUp")}</Text>
+        <Text style={[styles.registeruser, dynamicStyles.registeruser]}>{translate("auth.signUp")}</Text>
       </TouchableOpacity>
 
       <StatusBar style={darkMode ? "light" : "dark"} />

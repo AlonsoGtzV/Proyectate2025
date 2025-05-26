@@ -91,4 +91,9 @@ public class UserController {
     public Users completeLesson(@PathVariable Long id, @RequestParam String lessonId, @RequestParam String lessonName) {
         return userService.addCompletedLesson(id, lessonId, lessonName);
     }
+
+    @GetMapping("/{id}/keys")
+    public int getUserKeys(@PathVariable Long id) {
+        return userService.getUserKeys(id);
+    }
 }

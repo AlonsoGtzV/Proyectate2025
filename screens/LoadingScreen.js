@@ -11,7 +11,7 @@ export default function LoadingScreen({ navigation, route }) {
     const { translate } = useLanguage();
     const { token } = useToken();
     const [loadingProgress, setLoadingProgress] = useState(0);
-    const [loadingMessage, setLoadingMessage] = useState(translate("loading"));
+    const [loadingMessage, setLoadingMessage] = useState(translate("common.loading"));
 
     // Obtener la lección desde los parámetros de navegación
     const { lesson } = route.params || {};
@@ -20,13 +20,13 @@ export default function LoadingScreen({ navigation, route }) {
         const loadLesson = async () => {
             try {
                 // Simular progreso de carga
-                setLoadingMessage(translate("preparing_lesson") || "Preparando lección...");
+                setLoadingMessage(translate("lesson.preparing"));
                 setLoadingProgress(25);
 
                 // Esperar un poco para mostrar el progreso
                 await new Promise(resolve => setTimeout(resolve, 800));
 
-                setLoadingMessage(translate("loading_content") || "Cargando contenido...");
+                setLoadingMessage(translate("lesson.loading"));
                 setLoadingProgress(50);
 
                 // Si tenemos una lección completa, proceder directamente
@@ -34,7 +34,7 @@ export default function LoadingScreen({ navigation, route }) {
                     await new Promise(resolve => setTimeout(resolve, 800));
                     setLoadingProgress(75);
 
-                    setLoadingMessage(translate("almost_ready") || "Casi listo...");
+                    setLoadingMessage(translate("lesson.almost_ready"));
                     await new Promise(resolve => setTimeout(resolve, 600));
                     setLoadingProgress(100);
 
@@ -56,7 +56,7 @@ export default function LoadingScreen({ navigation, route }) {
                     const fullLesson = await response.json();
                     setLoadingProgress(75);
 
-                    setLoadingMessage(translate("almost_ready") || "Casi listo...");
+                    setLoadingMessage(translate("lesson.almost_ready") || "Casi listo...");
                     await new Promise(resolve => setTimeout(resolve, 600));
                     setLoadingProgress(100);
 
@@ -97,7 +97,7 @@ export default function LoadingScreen({ navigation, route }) {
                         ]
                     };
 
-                    setLoadingMessage(translate("almost_ready") || "Casi listo...");
+                    setLoadingMessage(translate("lesson.almost_ready") || "Casi listo...");
                     await new Promise(resolve => setTimeout(resolve, 600));
                     setLoadingProgress(100);
 
@@ -135,7 +135,7 @@ export default function LoadingScreen({ navigation, route }) {
             </View>
 
             <Text style={styles.quote}>
-                {`"${translate("bridgeToEnglish") || "Tu puente hacia el inglés"}"`}
+                {`"${translate("loading.bridgeToEnglish")}"`}
             </Text>
 
             {/* Barra de progreso */}

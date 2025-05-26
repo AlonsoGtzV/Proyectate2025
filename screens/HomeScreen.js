@@ -22,44 +22,51 @@ export default function HomeScreen({ navigation }) {
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [completedLessons, setCompletedLessons] = useState([]);
   const { darkMode, toggleTheme } = useTheme();
   const { translate } = useLanguage();
   const { width, height } = Dimensions.get('window');
   const { token } = useToken();
 
-  const baseUnitsByArea = {
-    Software: [
-      { id: 1, unitTitle: translate('unit_1_title_software') },
-      { id: 2, unitTitle: translate('unit_2_title_software') },
-      { id: 3, unitTitle: translate('unit_3_title_software') },
-    ],
-    Electronics: [
-      { id: 1, unitTitle: translate('unit_1_title_electronics') },
-      { id: 2, unitTitle: translate('unit_2_title_electronics') },
-      { id: 3, unitTitle: translate('unit_3_title_electronics') },
-    ],
+  const handleLockedUnitPress = async (unitId) => {
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      const response = await fetch(`http://10.0.2.2:8080/api/users/${userId}/unlock-unit/${unitId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          unitId: unitId
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Actualizar el estado local de las unidades
+        setUnits(prevUnits => prevUnits.map(unit =>
+          unit.id === unitId ? { ...unit, locked: false } : unit
+        ));
+        Alert.alert(
+          translate('home.unlock_success_title'),
+          translate('home.unlock_success_message')
+        );
+      } else {
+        Alert.alert(
+          translate('home.unlock_error_title'),
+          data.message || translate('home.not_enough_keys')
+        );
+      }
+    } catch (error) {
+      console.error('Error al desbloquear unidad:', error);
+      Alert.alert(
+        translate('common.error'),
+        translate('home.unlock_error_message')
+      );
+    }
   };
-  // Datos estáticos de respaldo (del primer archivo)
-  const fallbackUnits = [
-    {
-      id: 1,
-      unitTitle: translate('unit_1_title_software'),
-      locked: false,
-      lessons: [],
-    },
-    {
-      id: 2,
-      unitTitle: translate('unit_2_title_software'),
-      locked: true,
-      lessons: [],
-    },
-    {
-      id: 3,
-      unitTitle: translate('unit_3_title_software'),
-      locked: true,
-      lessons: [],
-    },
-  ];
 
   // Función para obtener datos del backend
   useEffect(() => {
@@ -79,6 +86,21 @@ export default function HomeScreen({ navigation }) {
         });
         if (!userRes.ok) throw new Error('Error al obtener usuario');
         const user = await userRes.json();
+
+        setCompletedLessons(user.completedLessons || []);
+
+        const baseUnitsByArea = {
+          Software: [
+            { id: 1, unitTitle: translate('home.unit_1_title_software') },
+            { id: 2, unitTitle: translate('home.unit_2_title_software') },
+            { id: 3, unitTitle: translate('home.unit_3_title_software') },
+          ],
+          Electronics: [
+            { id: 1, unitTitle: translate('home.unit_1_title_electronics') },
+            { id: 2, unitTitle: translate('home.unit_2_title_electronics') },
+            { id: 3, unitTitle: translate('home.unit_3_title_electronics') },
+          ],
+        };
 
         const unlockedUnits = user.unlockedUnits;
 
@@ -121,15 +143,10 @@ export default function HomeScreen({ navigation }) {
     fetchData();
   }, [token, translate]);
 
+
+
   const toggleUnit = (unitIndex) => {
     setExpandedUnit(expandedUnit === unitIndex ? null : unitIndex);
-  };
-
-  const handleLockedUnitPress = () => {
-    Alert.alert(
-        translate('locked_unit_alert'),
-        translate('locked_unit_message'),
-    );
   };
 
   const getLessonIcon = (iconType, color = "white") => {
@@ -150,47 +167,47 @@ export default function HomeScreen({ navigation }) {
     {
       id: 'lessons',
       style: { top: '13%', width: '100%', height: '20%' },
-      message: translate('tutorial_lessons'),
+      message: translate('tutorial.lessons'),
     },
     {
       id: 'lockedUnit',
       style: { top: "23%", width: '100%', height: '10%' },
-      message: translate('tutorial_locked_unit'),
+      message: translate('tutorial.locked_unit'),
     },
     {
       id: 'key',
       style: {},
-      message: translate('tutorial_key'),
+      message: translate('tutorial.key'),
     },
     {
       id: 'footerIcon1',
       style: { bottom: 4, left: 20, width: 40, height: 40 },
-      message: translate('tutorial_calendar'),
+      message: translate('tutorial.calendar'),
     },
     {
       id: 'footerIcon2',
       style: { bottom: 4, left: '24%', width: 40, height: 40 },
-      message: translate('tutorial_stats'),
+      message: translate('tutorial.stats'),
     },
     {
       id: 'footerIcon3',
       style: { bottom: 4, right: '23%', width: 40, height: 40 },
-      message: translate('tutorial_chat'),
+      message: translate('tutorial.chat'),
     },
     {
       id: 'footerIcon4',
       style: { bottom: 4, right: '5%', width: 40, height: 40 },
-      message: translate('tutorial_profile'),
+      message: translate('tutorial.profile'),
     },
     {
       id: 'footerLogo',
       style: { bottom: 4, left: '40%', width: 80, height: 90 },
-      message: translate('tutorial_logo'),
+      message: translate('tutorial.logo'),
     },
     {
       id: 'farewell',
       style: {},
-      message: translate('tutorial_farewell'),
+      message: translate('tutorial.farewell'),
     }
   ];
 
@@ -320,6 +337,9 @@ export default function HomeScreen({ navigation }) {
     },
     tooltipText: {
       color: darkMode ? '#E0E0E0' : '#333',
+    },
+    finalTestButton: {
+        backgroundColor: darkMode ? '#4A90E2' : '#2C5E86',
     }
   });
 
@@ -372,7 +392,7 @@ export default function HomeScreen({ navigation }) {
             <Text style={[styles.tooltipText, dynamicStyles.tooltipText]}>
               {currentStep.message}
             </Text>
-            <Text style={styles.tooltipActionText}>{translate('continue')}</Text>
+            <Text style={styles.tooltipActionText}>{translate('common.continue')}</Text>
           </View>
         </TouchableOpacity>
     );
@@ -382,7 +402,7 @@ export default function HomeScreen({ navigation }) {
     return (
         <View style={[styles.container, dynamicStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
           <Text style={[styles.headerText, { color: darkMode ? '#E0E0E0' : '#2C5E86' }]}>
-            {translate('loading') || 'Cargando...'}
+            {translate('common.loading') || 'Cargando...'}
           </Text>
         </View>
     );
@@ -396,7 +416,7 @@ export default function HomeScreen({ navigation }) {
               source={require("../assets/Synlogo.png")}
               style={[styles.logo, dynamicStyles.footerLogo]}
           />
-          <Text style={[styles.headerText, dynamicStyles.headerText]}>{translate('app_name')}</Text>
+          <Text style={[styles.headerText, dynamicStyles.headerText]}>{translate('home.app_name')}</Text>
         </View>
 
         {/* Unidades */}
@@ -408,7 +428,13 @@ export default function HomeScreen({ navigation }) {
                       styles.activeUnitHeader,
                       unit.locked && { opacity: 0.5 },
                     ]}
-                    onPress={() => unit.locked ? handleLockedUnitPress() : setExpandedUnit(expandedUnit === unitIndex ? null : unitIndex)}
+                    onPress={() => {
+                      if (unit.locked) {
+                        handleLockedUnitPress(unit.id);
+                      } else {
+                        setExpandedUnit(expandedUnit === unitIndex ? null : unitIndex);
+                      }
+                    }}
                 >
                   <Text style={styles.unitTitle}>
                     {unit.unitTitle}
@@ -424,28 +450,54 @@ export default function HomeScreen({ navigation }) {
                     />
                   </View>
                 </TouchableOpacity>
+
                 {!unit.locked && expandedUnit === unitIndex && (
                     <View>
                       {unit.lessons.length === 0 ? (
-                          <Text style={styles.lessonSubtitle}>{translate('no_lessons')}</Text>
+                          <Text style={styles.lessonSubtitle}>
+                            {translate('no_lessons')}
+                          </Text>
                       ) : (
-                          unit.lessons.map((lesson, idx) => (
-                              <TouchableOpacity
-                                  key={lesson.id || idx}
-                                  style={styles.lessonBox}
-                                  onPress={() =>
-                                    unit.locked
-                                      ? handleLockedUnitPress()
-                                      : navigation.navigate("Loading", { lesson })
-                                  }
-                              >
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                  {getLessonIcon(lesson.iconType)}
-                                  <Text style={styles.lessonTitle}>{lesson.lessonContent.title}</Text>
+                          <>
+                            {unit.lessons.map((lesson, idx) => (
+                                <TouchableOpacity
+                                    key={lesson.id || idx}
+                                    style={styles.lessonBox}
+                                    onPress={() => navigation.navigate("Loading", { lesson })}
+                                >
+                                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    {getLessonIcon(lesson.iconType)}
+                                    <Text style={styles.lessonTitle}>
+                                      {lesson.lessonContent.title}
+                                    </Text>
+                                  </View>
+                                  <Text style={styles.lessonSubtitle}>
+                                    {lesson.lessonContent.text}
+                                  </Text>
+                                </TouchableOpacity>
+                            ))}
+                            {completedLessons.length >= unit.lessons.length &&
+                            unit.lessons.every(lesson =>
+                                completedLessons.some(completed =>
+                                    completed.lessonId === lesson.id
+                                )
+                            ) ? (
+                                <TouchableOpacity
+                                    style={[styles.finalTestButton, dynamicStyles.finalTestButton]}
+                                    onPress={() => navigation.navigate("FinalTest", { unitId: unit.id })}
+                                >
+                                  <Ionicons name="trophy" size={24} color={darkMode ? '#E0E0E0' : '#fff'} />
+                                  <Text style={styles.finalTestText}>Test Final</Text>
+                                </TouchableOpacity>
+                            ) : (
+                                <View style={styles.testLockedContainer}>
+                                  <Text style={[styles.testLockedText, dynamicStyles.text]}>
+                                    {translate('test.locked_message')}
+                                  </Text>
+                                  <Ionicons name="lock-closed" size={20} color={darkMode ? '#E0E0E0' : '#333'} />
                                 </View>
-                                <Text style={styles.lessonSubtitle}>{lesson.lessonContent.text}</Text>
-                              </TouchableOpacity>
-                          ))
+                            )}
+                          </>
                       )}
                     </View>
                 )}
@@ -689,5 +741,36 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'white',
     borderRadius: 10,
+  },
+  finalTestButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#2C5E86',
+      padding: 15,
+      borderRadius: 10,
+      marginTop: 10,
+      marginBottom: 15,
+      gap: 10,
+  },
+  finalTestText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: 'bold',
+  },
+  testLockedContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 15,
+      marginTop: 10,
+      marginBottom: 15,
+      gap: 10,
+      opacity: 0.7,
+  },
+  testLockedText: {
+      fontSize: 14,
+      textAlign: 'center',
+      fontStyle: 'italic',
   },
 });

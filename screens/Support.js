@@ -19,7 +19,7 @@ import { useLanguage } from "./LanguageContext";
 export default function Support({ navigation }) {
   const { darkMode } = useTheme();
   const { translate } = useLanguage();
-  const problems = translate("supportProblems") || [];
+  const problems = translate("support.problems") || [];
   const [problemSelected, setProblemSelected] = useState(problems[0] || "");
   const [selectedImage, setSelectedImage] = useState(null);
 
@@ -29,8 +29,8 @@ export default function Support({ navigation }) {
 
     if (status !== "granted") {
       Alert.alert(
-        translate("supportPermissionDeniedTitle"),
-        translate("supportPermissionDeniedMessage")
+        translate("support.PermissionDeniedTitle"),
+        translate("support.PermissionDeniedMessage")
       );
       return;
     }
@@ -119,26 +119,26 @@ export default function Support({ navigation }) {
           source={require("../assets/Synlogo.png")}
           style={[styles.logo, dynamicStyles.logo]}
         />
-        <Text style={[styles.headerText, dynamicStyles.headerText]}>{translate("supportTitle")}</Text>
+        <Text style={[styles.headerText, dynamicStyles.headerText]}>{translate("support.title")}</Text>
 
       </View>
 
       <ScrollView>
         {/* Texto de ayuda */}
-        <Text style={[styles.question, dynamicStyles.question]}>{translate("supportQuestion")}</Text>
+        <Text style={[styles.question, dynamicStyles.question]}>{translate("support.question")}</Text>
 <Text style={[styles.instructions, dynamicStyles.instructions]}>
-  {translate("supportInstructions")}
+  {translate("support.instructions")}
 </Text>
 
 
         {/* Campos del formulario */}
         <TextInput 
-          placeholder={translate("supportEmailPlaceholder")} 
+          placeholder={translate("support.emailPlaceholder")}
           style={[styles.input, dynamicStyles.input]} 
           placeholderTextColor={dynamicStyles.placeholderColor.color}
         />
         <TextInput 
-          placeholder={translate("supportSubjectPlaceholder")} 
+          placeholder={translate("support.subjectPlaceholder")}
           style={[styles.input, dynamicStyles.input]} 
           placeholderTextColor={dynamicStyles.placeholderColor.color}
         />
@@ -163,7 +163,7 @@ export default function Support({ navigation }) {
           </Picker>
         </View>
         <TextInput
-           placeholder={translate("supportDescriptionPlaceholder")}
+           placeholder={translate("support.descriptionPlaceholder")}
           style={[styles.input, dynamicStyles.input, { height: 100 }]}
           multiline
           placeholderTextColor={dynamicStyles.placeholderColor.color}
@@ -175,7 +175,7 @@ export default function Support({ navigation }) {
           onPress={handlePickImage}
         >
           <Text style={[styles.fileButtonText, dynamicStyles.fileButtonText]}>
-  {selectedImage ? translate("supportPhotoSelected") : translate("supportAddPhoto")}
+  {selectedImage ? translate("support.photoSelected") : translate("support.addPhoto")}
 </Text>
 
         </TouchableOpacity>
@@ -193,13 +193,13 @@ export default function Support({ navigation }) {
           style={[styles.sendButton, dynamicStyles.sendButton]}
           onPress={() =>
             Alert.alert(
-              translate("supportSentTitle"),
-              translate("supportSentMessage"),
-              [{ text: translate("understood"), style: "default" }]
+              translate("support.sentTitle"),
+              translate("support.sentMessage"),
+              [{ text: translate("common.understood"), style: "default" }]
             )
           }
         >
-          <Text style={styles.sendButtonText}>{translate("supportSend")}</Text>
+          <Text style={styles.sendButtonText}>{translate("support.send")}</Text>
         </TouchableOpacity>
       </ScrollView>
 
