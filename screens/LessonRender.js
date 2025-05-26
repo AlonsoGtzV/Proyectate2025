@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
+    Alert,
     Text,
     StyleSheet,
     TouchableOpacity,
@@ -11,6 +12,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from './ThemeContext';
 import { useLanguage } from './LanguageContext';
+import { useToken } from '../services/TokenContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LessonRender({ route, navigation }) {
     const [quizStep, setQuizStep] = useState(0);
@@ -21,6 +24,53 @@ export default function LessonRender({ route, navigation }) {
 
     const { darkMode } = useTheme();
     const { translate } = useLanguage();
+    const { token } = useToken();
+
+
+    useEffect(() => {
+        const completeLessonIfPassed = async () => {
+            if (showResult) {
+                const percentage = Math.round((score / test.length) * 100);
+                if (percentage >= 75) {
+                    try {
+                        const userId = await AsyncStorage.getItem('userId');
+                        const params = new URLSearchParams({
+                            lessonId: lesson.id,
+                            lessonName: lesson.lessonContent.title
+                        }).toString();
+
+                        const response = await fetch(
+                            `http://10.0.2.2:8080/api/users/${userId}/complete-lesson?${params}`,
+                            {
+                                method: 'PUT',
+                                headers: {
+                                    'Authorization': `Bearer ${token}`,
+                                    'Content-Type': 'application/json'
+                                }
+                            }
+                        );
+
+                        if (response.ok) {
+                            Alert.alert(
+                                translate('lesson.success') || '¡Felicitaciones!',
+                                translate('lesson.completed_message') || '¡Has completado esta lección!',
+                                    [
+                                        {
+                                            text: 'OK',
+                                            onPress: () => navigation.navigate('Home')
+                                        }
+                                    ]
+                            );
+                        }
+                    } catch (error) {
+                        console.error('Error al marcar lección como completada:', error);
+                    }
+                }
+            }
+        };
+
+        completeLessonIfPassed();
+    }, [showResult, score, test?.length]);
 
     // Obtener la lección desde los parámetros de navegación
     const { lesson } = route.params || {};
@@ -29,7 +79,7 @@ export default function LessonRender({ route, navigation }) {
         return (
             <SafeAreaView style={[styles.container, dynamicStyles.container]}>
                 <Text style={[styles.errorText, dynamicStyles.text]}>
-                    {translate('lesson_not_found') || 'Lección no encontrada'}
+                    {translate('lesson.lesson_not_found')}
                 </Text>
             </SafeAreaView>
         );
@@ -110,7 +160,7 @@ export default function LessonRender({ route, navigation }) {
                     <Ionicons name="arrow-back" size={24} color="white" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>
-                    {lessonContent?.title || translate('lesson') || 'Lección'}
+                    {lessonContent?.title || translate('lesson.lesson')}
                 </Text>
                 <View style={styles.placeholder} />
             </View>
@@ -118,7 +168,7 @@ export default function LessonRender({ route, navigation }) {
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
                 {/* Título de la lección */}
                 <Text style={[styles.title, dynamicStyles.title]}>
-                    {lessonContent?.title || translate('untitled_lesson') || 'Lección sin título'}
+                    {lessonContent?.title || translate('lesson.untitled_lesson')}
                 </Text>
 
                 {/* Contenido principal */}
@@ -132,7 +182,7 @@ export default function LessonRender({ route, navigation }) {
                 {lessonContent?.detailedExplanation && (
                     <>
                         <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
-                            {translate('detailed_explanation') || 'Explicación Detallada'}
+                            {translate('lesson.detailed_explanation')}
                         </Text>
                         <Text style={[styles.explanation, dynamicStyles.text]}>
                             {lessonContent.detailedExplanation}
@@ -144,7 +194,7 @@ export default function LessonRender({ route, navigation }) {
                 {lessonContent?.vocabulary && lessonContent.vocabulary.length > 0 && (
                     <>
                         <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
-                            {translate('vocabulary') || 'Vocabulario'}
+                            {translate('lesson.vocabulary')}
                         </Text>
                         {lessonContent.vocabulary.map((item, index) => (
                             <View key={index} style={[styles.vocabItem, dynamicStyles.vocabItem]}>
@@ -166,7 +216,7 @@ export default function LessonRender({ route, navigation }) {
                         onPress={() => setShowQuiz(true)}
                     >
                         <Text style={styles.startQuizText}>
-                            {translate('start_quiz') || 'Comenzar Quiz'}
+                            {translate('lesson.start_quiz')}
                         </Text>
                     </TouchableOpacity>
                 )}
@@ -175,7 +225,7 @@ export default function LessonRender({ route, navigation }) {
                 {test && test.length > 0 && showQuiz && !showResult && (
                     <View style={[styles.quizContainer, dynamicStyles.quizContainer]}>
                         <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
-                            {translate('quiz') || 'Quiz'} ({quizStep + 1}/{test.length})
+                            {translate('lesson.quiz') || 'Quiz'} ({quizStep + 1}/{test.length})
                         </Text>
 
                         <Text style={[styles.question, dynamicStyles.text]}>
@@ -215,10 +265,10 @@ export default function LessonRender({ route, navigation }) {
                 {showResult && (
                     <View style={[styles.resultContainer, dynamicStyles.quizContainer]}>
                         <Text style={[styles.resultTitle, dynamicStyles.title]}>
-                            {translate('quiz_completed') || '¡Quiz Completado!'}
+                            {translate('lesson.quiz_completed')}
                         </Text>
                         <Text style={[styles.result, dynamicStyles.text]}>
-                            {translate('score') || 'Puntaje'}: {score} / {test.length}
+                            {translate('lesson.score')}: {score} / {test.length}
                         </Text>
                         <Text style={[styles.percentage, dynamicStyles.sectionTitle]}>
                             {Math.round((score / test.length) * 100)}%
@@ -229,7 +279,7 @@ export default function LessonRender({ route, navigation }) {
                             onPress={resetQuiz}
                         >
                             <Text style={styles.retryText}>
-                                {translate('try_again') || 'Intentar de Nuevo'}
+                                {translate('lesson.try_again')}
                             </Text>
                         </TouchableOpacity>
                     </View>

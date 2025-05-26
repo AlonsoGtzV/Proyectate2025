@@ -15,6 +15,7 @@ import { TutorialProvider } from "./screens/TutorialContext";
 import { ThemeProvider } from "./screens/ThemeContext"; 
 import { LanguageProvider } from "./screens/LanguageContext";
 import EnglishLevelSelection from "./screens/EnglishLevelSelection";
+import test from "./screens/Test";
 import LoadingScreen from "./screens/LoadingScreen";
 import LessonRender from "./screens/LessonRender";
 import {TokenProvider} from "./services/TokenContext";
@@ -45,6 +46,7 @@ export default function App() {
 					<Stack.Screen name="Progress" component={ProgressScreen} />
 					<Stack.Screen name="Loading" component={LoadingScreen} />
 					<Stack.Screen name="LessonRender" component={LessonRender} />
+					<Stack.Screen name="FinalTest" component={test} />
 		        </Stack.Navigator>
 		      </NavigationContainer>
 			  </UserProvider>

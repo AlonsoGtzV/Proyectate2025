@@ -161,7 +161,7 @@ Si el usuario pregunta algo fuera de ese contexto, responde: 'Lo siento, solo pu
         {/* Mensaje de bienvenida de la IA */}
         <View style={[styles.aiMessageContainer, dynamicStyles.aiMessageContainer]}>
           <Text style={[styles.aiMessageText, dynamicStyles.aiMessageText]}>
-            {translate("message")}
+            {translate("chat.message")}
           </Text>
         </View>
 
@@ -198,7 +198,7 @@ Si el usuario pregunta algo fuera de ese contexto, responde: 'Lo siento, solo pu
           style={[styles.textInput, dynamicStyles.textInput]}
           value={message}
           onChangeText={setMessage}
-          placeholder={translate("type")}
+          placeholder={translate("chat.type")}
           placeholderTextColor={darkMode ? "#999" : "#666"}
         />
         <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
@@ -208,8 +208,8 @@ Si el usuario pregunta algo fuera de ese contexto, responde: 'Lo siento, solo pu
 
       {/* Contenedor para los textos e información */}
       <View style={styles.infoContainer}>
-        <Text style={[styles.infoText, dynamicStyles.infoText]}>{translate("info1")}</Text>
-        <Text style={[styles.infoText, dynamicStyles.infoText]}>{translate("info2")}</Text>
+        <Text style={[styles.infoText, dynamicStyles.infoText]}>{translate("chat.info1")}</Text>
+        <Text style={[styles.infoText, dynamicStyles.infoText]}>{translate("chat.info2")}</Text>
       </View>
 
       {/* Footer */}

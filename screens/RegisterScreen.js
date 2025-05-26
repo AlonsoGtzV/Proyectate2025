@@ -42,12 +42,12 @@ export default function RegisterScreen() {
     const { lengthValid, hasUppercase, hasSymbol } = validatePassword(password);
 
   if (!lengthValid || !hasUppercase || !hasSymbol) {
-    setPasswordError(translate("passwordError1"));
+    setPasswordError(translate("auth.passwordError1"));
     return;
   }
 
   if (password !== repeatPassword) {
-    setPasswordError(translate("passwordError2"));
+    setPasswordError(translate("auth.passwordError2"));
     return;
   }
 
@@ -101,7 +101,7 @@ export default function RegisterScreen() {
 
       <TextInput
         style={[styles.input, dynamicStyles.input]}
-        placeholder= {translate("username")}
+        placeholder= {translate("auth.username")}
         placeholderTextColor={dynamicStyles.placeholderColor.color}
         value={username}
         onChangeText={setUsername}
@@ -109,7 +109,7 @@ export default function RegisterScreen() {
 
       <TextInput
         style={[styles.input, dynamicStyles.input]}
-        placeholder={translate("email")}
+        placeholder={translate("auth.email")}
         placeholderTextColor={dynamicStyles.placeholderColor.color}
         keyboardType="email-address"
         autoCapitalize="none"
@@ -119,7 +119,7 @@ export default function RegisterScreen() {
 
       <TextInput
         style={[styles.input, dynamicStyles.input]}
-        placeholder={translate("password")} 
+        placeholder={translate("auth.password")}
         placeholderTextColor={dynamicStyles.placeholderColor.color}
         secureTextEntry
         value={password}
@@ -133,7 +133,7 @@ export default function RegisterScreen() {
             { color: requirements.lengthValid ? "green" : "red" }
           ]}
         >
-          • {translate("passwordLength")}
+          • {translate("auth.passwordLength")}
         </Text>
         <Text
           style={[
@@ -141,7 +141,7 @@ export default function RegisterScreen() {
             { color: requirements.hasUppercase ? "green" : "red" }
           ]}
         >
-          • {translate("passwordUpper")}
+          • {translate("auth.passwordUpper")}
         </Text>
         <Text
           style={[
@@ -149,7 +149,7 @@ export default function RegisterScreen() {
             { color: requirements.hasSymbol ? "green" : "red" }
           ]}
         >
-          • {translate("passwordSymbol")}
+          • {translate("auth.passwordSymbol")}
         </Text>
       </View>
 
@@ -159,7 +159,7 @@ export default function RegisterScreen() {
 
       <TextInput
         style={[styles.input, dynamicStyles.input]}
-        placeholder={translate("repeatPassword")}
+        placeholder={translate("auth.repeatPassword")}
         placeholderTextColor={dynamicStyles.placeholderColor.color}
         secureTextEntry
         value={repeatPassword}
@@ -168,7 +168,7 @@ export default function RegisterScreen() {
 
       <TouchableOpacity onPress={showDatePicker} style={[styles.input, dynamicStyles.input]}>
         <Text style={dynamicStyles.dateText}>
-          {birthday || translate("birthday")}
+          {birthday || translate("auth.birthday")}
         </Text>
       </TouchableOpacity>
 
@@ -181,15 +181,15 @@ export default function RegisterScreen() {
       />
 
       <TouchableOpacity style={[styles.button, dynamicStyles.button]} onPress={handleSignUp}>
-        <Text style={styles.buttonText}>{translate("register")}</Text>
+        <Text style={styles.buttonText}>{translate("auth.register")}</Text>
       </TouchableOpacity>
 
       <View style={styles.loginContainer}>
         <Text style={[styles.loginText, dynamicStyles.loginText]}>
-          {translate("haveaccount")}{' '}
+          {translate("auth.haveAccount")}{' '}
         </Text>
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={[styles.loginLink, dynamicStyles.loginLink]}>{translate("haveaccount2")}</Text>
+          <Text style={[styles.loginLink, dynamicStyles.loginLink]}>{translate("auth.haveAccount2")}</Text>
         </TouchableOpacity>
       </View>
       <StatusBar style={darkMode ? "light" : "dark"} />

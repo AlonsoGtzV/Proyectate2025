@@ -2,6 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import React, { useState, useEffect } from "react";
 import {
   View,
+  Alert,
   Text,
   StyleSheet,
   TouchableOpacity,
@@ -39,15 +40,40 @@ export default function UserScreen({ navigation }) {
   const [isAreaModalVisible, setAreaModalVisible] = useState(false);
 
   useEffect(() => {
+    const saveLanguagePreference = async () => {
+      try {
+        await AsyncStorage.setItem('@app_language', language);
+      } catch (error) {
+        console.error('Error guardando preferencia de idioma:', error);
+        Alert.alert(
+          translate('user.settings.error'),
+          translate('user.settings.language_save_error')
+        );
+      }
+    };
+    if (language) saveLanguagePreference();
+  }, [language]);
+
+  useEffect(() => {
     const fetchUser = async () => {
+      if (!token) return;
       setLoading(true);
       try {
         const userData = await getUser(token);
+        if (!userData) throw new Error('No se encontraron datos de usuario');
+
         setUser(userData);
-        setEnglishLevel(userData.englishLevel || '')
-        setSpecificArea(userData.specificArea || '')
-      } catch (e) {
+        setEnglishLevel(userData.englishLevel || '');
+        setSpecificArea(userData.specificArea || '');
+        setLanguagePreference(userData.languagePreference || language);
+
+      } catch (error) {
+        console.error('Error obteniendo datos del usuario:', error);
         setUser(null);
+        Alert.alert(
+          translate('common.error'),
+          translate('user.fetch_error')
+        );
       } finally {
         setLoading(false);
       }
@@ -55,47 +81,42 @@ export default function UserScreen({ navigation }) {
     fetchUser();
   }, [token]);
 
-  const mapEnglishLevel = (level) => {
-    if (level === "A1" || level === "A2") return "Beginner";
-    if (level === "B1" || level === "B2") return "Intermediate";
-    if (level === "C1" || level === "C2") return "Advanced";
-    return null;
-  };
-
-  const mapLanguage = (lang) => {
-    if (lang === "es") return "es";
-    if (lang === "en" || lang === "us") return "us";
-    return null;
-  };
-
-  const mapArea = (area) => {
-    if (area === "Software") return "Software";
-    if (area === "Electronica") return "Electronics";
-    return null;
-  };
-
   const handleSave = async () => {
     if (!user) return;
-    const data = {
-      email: email !== '' ? email : null,
-      englishLevel: englishLevel !== '' ? englishLevel : null,
-      languagePreference: languagePreference !== '' ? languagePreference : null,
-      specificArea: specificArea !== '' ? specificArea : null,
-    };
+
     setLoading(true);
-    setLanguage(languagePreference);
     try {
+      const data = {
+        email: email.trim() || null,
+        englishLevel: englishLevel || null,
+        languagePreference: languagePreference || null,
+        specificArea: specificArea || null
+      };
+
+      // Primero actualizar el usuario en el backend
       await updateUserPartial(token, data);
-      // Refresca los datos del usuario
+
+      // Luego guardar el idioma en AsyncStorage y actualizar el contexto
+      if (languagePreference) {
+        await AsyncStorage.setItem('@app_language', languagePreference);
+        setLanguage(languagePreference);
+      }
+
+      // Después obtener los datos actualizados
       const updatedUser = await getUser(token);
       setUser(updatedUser);
+
+      // Limpiar campos
       setEmail('');
       setEnglishLevel('');
       setLanguagePreference('');
       setSpecificArea('');
-      alert(translate('changes saved') || 'Cambios guardados');
-    } catch (e) {
-      alert(translate('error saving') || 'Error al guardar');
+
+    } catch (error) {
+      console.error('Error al guardar:', error);
+      Alert.alert(
+          translate('common.error')
+      );
     } finally {
       setLoading(false);
     }
@@ -219,7 +240,7 @@ export default function UserScreen({ navigation }) {
           source={require("../assets/Synlogo.png")}
           style={[styles.logo, { backgroundColor: '#EFF1EC' }]}
         />
-        <Text style={[styles.headerText, dynamicStyles.headerText]}>{translate('profile')}</Text>
+        <Text style={[styles.headerText, dynamicStyles.headerText]}>{translate('user.profile')}</Text>
       </View>
 
       <ScrollView
@@ -227,7 +248,7 @@ export default function UserScreen({ navigation }) {
         contentContainerStyle={[styles.scrollContent, dynamicStyles.scrollContent]}
       >
         <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
-          {translate('personalInfo')}
+          {translate('user.personalInfo')}
         </Text>
         <Text style={[styles.infoText, dynamicStyles.infoText]}>
           {user.cognitoUsername}
@@ -251,22 +272,22 @@ export default function UserScreen({ navigation }) {
     style={{ color: englishLevel ? dynamicStyles.input.color : dynamicStyles.placeholderText.color }}
     dropdownIconColor={darkMode ? '#BDE4E6' : '#666'}
   >
-    <Picker.Item label={englishLevel || translate('selectLevel')} value="" enabled={false} />
-    <Picker.Item label={translate('a1')} value="A1" />
-    <Picker.Item label={translate('a2')} value="A2" />
-    <Picker.Item label={translate('b1')} value="B1" />
-    <Picker.Item label={translate('b2')} value="B2" />
-    <Picker.Item label={translate('c1')} value="C1" />
-    <Picker.Item label={translate('c2')} value="C2" />
+    <Picker.Item label={englishLevel || translate('user.selectLevel')} value="" enabled={false} />
+    <Picker.Item label={translate('user.a1')} value="Beginner" />
+    <Picker.Item label={translate('user.a2')} value="Beginner" />
+    <Picker.Item label={translate('user.b1')} value="Intermediate" />
+    <Picker.Item label={translate('user.b2')} value="Intermediate" />
+    <Picker.Item label={translate('user.c1')} value="Advanced" />
+    <Picker.Item label={translate('user.c2')} value="Advanced" />
   </Picker>
 </View>
 
         <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
-          {translate('settings')}
+          {translate('user.settings')}
         </Text>
 
         <Text style={[styles.label, dynamicStyles.label, { marginBottom: 5 }]}>
-          {translate('interfaceLanguage')}
+          {translate('user.interfaceLanguage')}
         </Text>
         <TouchableOpacity
           style={[styles.input, dynamicStyles.input, { justifyContent: "center" }]}
@@ -276,19 +297,19 @@ export default function UserScreen({ navigation }) {
           }}
         >
           <Text style={{ color: dynamicStyles.input.color }}>
-            {user.languagePreference === "es" ? translate('spanish') : translate('english')}
+            {languagePreference || translate('user.selectLanguage')}
           </Text>
         </TouchableOpacity>
 
 
         <TouchableOpacity
-  style={[styles.input, dynamicStyles.input, { justifyContent: "center" }]}
-  onPress={() => setAreaModalVisible(true)}
->
-  <Text style={{ color: dynamicStyles.input.color }}>
-    {specificArea || translate('selectArea')}
-  </Text>
-</TouchableOpacity>
+          style={[styles.input, dynamicStyles.input, { justifyContent: "center" }]}
+          onPress={() => setAreaModalVisible(true)}
+        >
+          <Text style={{ color: dynamicStyles.input.color }}>
+            {specificArea || translate('selectArea')}
+          </Text>
+        </TouchableOpacity>
 
 
 
@@ -297,16 +318,16 @@ export default function UserScreen({ navigation }) {
             onPress={handleSave}
         >
           <Text style={[styles.buttonText, dynamicStyles.buttonText]}>
-            {translate('save changes') || 'Guardar Cambios'}
+            {translate('user.save')}
           </Text>
         </TouchableOpacity>
 
         <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
-          {translate('displaySettings')}
+          {translate('user.displaySettings')}
         </Text>
         <View style={styles.row}>
           <Text style={[styles.label, dynamicStyles.label]}>
-            {translate('darkMode')}
+            {translate('user.darkMode')}
           </Text>
           <Switch 
             value={darkMode} 
@@ -317,14 +338,14 @@ export default function UserScreen({ navigation }) {
         </View>
 
         <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
-          {translate('helpSupport')}
+          {translate('user.helpSupport')}
         </Text>
         <TouchableOpacity 
           style={[styles.button, dynamicStyles.button]} 
           onPress={handleTutorialPress}
         >
           <Text style={[styles.buttonText, dynamicStyles.buttonText]}>
-            {translate('tutorial')}
+            {translate('user.tutorial')}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -332,7 +353,7 @@ export default function UserScreen({ navigation }) {
           onPress={() => navigation.navigate("Support")}
         >
           <Text style={[styles.buttonText, dynamicStyles.buttonText]}>
-            {translate('support')}
+            {translate('user.support')}
           </Text>
         </TouchableOpacity>
 
@@ -344,15 +365,15 @@ export default function UserScreen({ navigation }) {
         >
           <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
             <View style={{ backgroundColor: darkMode ? '#333' : '#fff', padding: 20, borderRadius: 10, width: "80%", alignItems: "center" }}>
-              <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 20, color: darkMode ? '#E0E0E0' : '#333' }}>{translate('selectLanguage')}</Text>
+              <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 20, color: darkMode ? '#E0E0E0' : '#333' }}>{translate('user.selectLanguage')}</Text>
               <TouchableOpacity onPress={() => { setLanguagePreference("es"); setLanguageModalVisible(false); }}>
-                <Text style={{ fontSize: 16, marginVertical: 10, color: darkMode ? '#E0E0E0' : '#333' }}>{translate('spanish')}</Text>
+                <Text style={{ fontSize: 16, marginVertical: 10, color: darkMode ? '#E0E0E0' : '#333' }}>{translate('user.spanish')}</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => { setLanguagePreference("us"); setLanguageModalVisible(false); }}>
-                <Text style={{ fontSize: 16, marginVertical: 10, color: darkMode ? '#E0E0E0' : '#333' }}>{translate('english')}</Text>
+                <Text style={{ fontSize: 16, marginVertical: 10, color: darkMode ? '#E0E0E0' : '#333' }}>{translate('user.english')}</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setLanguageModalVisible(false)}>
-                <Text style={{ marginTop: 20, color: darkMode ? '#ff6b6b' : 'red' }}>{translate('cancel')}</Text>
+                <Text style={{ marginTop: 20, color: darkMode ? '#ff6b6b' : 'red' }}>{translate('common.cancel')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -374,7 +395,7 @@ export default function UserScreen({ navigation }) {
                 <Text style={{ fontSize: 16, marginVertical: 10, color: darkMode ? '#E0E0E0' : '#333' }}>Electronics</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setAreaModalVisible(false)}>
-                <Text style={{ marginTop: 20, color: darkMode ? '#ff6b6b' : 'red' }}>{translate('cancel')}</Text>
+                <Text style={{ marginTop: 20, color: darkMode ? '#ff6b6b' : 'red' }}>{translate('common.cancel')}</Text>
               </TouchableOpacity>
             </View>
           </View>

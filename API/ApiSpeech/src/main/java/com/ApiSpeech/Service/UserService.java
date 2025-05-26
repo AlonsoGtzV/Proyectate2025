@@ -17,5 +17,6 @@ public interface UserService {
     Users unlockUnit(Long id, Integer unitId);
     Users updateCognitoAttributes(Long id, String newEmail);
     Users addCompletedLesson(Long id, String lessonId, String LessonName);
+    int getUserKeys(Long userId);
 }
 

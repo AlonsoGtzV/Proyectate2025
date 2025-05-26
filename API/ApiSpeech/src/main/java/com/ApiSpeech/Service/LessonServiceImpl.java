@@ -74,12 +74,10 @@ public class LessonServiceImpl implements LessonService {
         lessonRepository.deleteById(id.toString());
     }
     @Override
-    public List<Lesson.Test> getQuestionsByUnit(int unit, String englishLevel, String languagePreference, String specificArea) {
+    public List<Lesson.Test> getQuestionsByUnit(int unit, String languagePreference, String specificArea) {
         return StreamSupport.stream(lessonRepository.findAll().spliterator(), false)
                 .filter(lesson -> lesson.getUnit() != null && lesson.getUnit() == unit)
-                .filter(lesson -> englishLevel == null || englishLevel.equals(lesson.getEnglishLevel()))
-                .filter(lesson -> languagePreference == null || languagePreference.equals(lesson.getLanguagePreference()))
-                .filter(lesson -> specificArea == null || specificArea.equals(lesson.getSpecificArea()))
+                .filter(lesson -> specificArea != null || specificArea.equals(lesson.getSpecificArea()))
                 .flatMap(lesson -> lesson.getTest().stream())
                 .toList();
     }
