@@ -250,12 +250,12 @@ export default function UserScreen({ navigation }) {
         <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
           {translate('user.personalInfo')}
         </Text>
-        <Text style={[styles.infoText, dynamicStyles.infoText]}>
+        <Text style={[styles.infoText, dynamicStyles.headerText]}>
           {user.cognitoUsername}
         </Text>
 
         <TextInput 
-          placeholder={user.email}
+          placeholder={user.email || translate('user.emailPlaceholder')}
           placeholderTextColor={dynamicStyles.placeholderText.color}
           style={[styles.input, dynamicStyles.input]}
           onChangeText={setEmail}

@@ -268,7 +268,7 @@ public class UserServiceImpl implements UserService {
         user.getCompletedLessons().add(lesson);
         return userRepository.save(user);
     }
-    
+
     @Override
     public int getUserKeys(Long userId) {
         Users user = userRepository.findById(userId)

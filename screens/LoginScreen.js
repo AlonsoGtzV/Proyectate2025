@@ -150,11 +150,12 @@ useEffect(() => {
           <FontAwesome name="envelope" size={18} style={[styles.icon, dynamicStyles.icon]} />
 
           <TextInput
-              style={styles.input}
               placeholder="Usuario"
+              style={[styles.input, dynamicStyles.input]}
               value={username}
               onChangeText={setUsername}
               autoCapitalize="none"
+              placeholderTextColor={dynamicStyles.placeholderColor.color}
           />
         </View>
 

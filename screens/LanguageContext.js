@@ -35,6 +35,7 @@ const translations = {
       support: "Support",
       selectLanguage: "Select a language",
       save: "Save changes",
+      emailPlaceholder: "Email address",
     },
     home: {
       app_name: "SynSpeech",
@@ -195,6 +196,7 @@ const translations = {
       support: "Soporte",
       selectLanguage: "Selecciona un idioma",
       save: "Guardar cambios",
+      emailPlaceholder: "Correo electrónico",
     },
     home: {
       app_name: "SynSpeech",
