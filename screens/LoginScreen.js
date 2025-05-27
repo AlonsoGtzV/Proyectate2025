@@ -181,10 +181,6 @@ useEffect(() => {
         </View>
       </View>
 
-      <TouchableOpacity>
-        <Text style={[styles.forgotPassword, dynamicStyles.forgotPassword]}>{translate("auth.forgotPassword")}</Text>
-      </TouchableOpacity>
-
       <TouchableOpacity 
         style={[styles.loginButton, dynamicStyles.loginButton]} 
         onPress={handleLogin}>

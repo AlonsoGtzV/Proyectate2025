@@ -77,6 +77,7 @@ public class LessonServiceImpl implements LessonService {
     public List<Lesson.Test> getQuestionsByUnit(int unit, String languagePreference, String specificArea) {
         return StreamSupport.stream(lessonRepository.findAll().spliterator(), false)
                 .filter(lesson -> lesson.getUnit() != null && lesson.getUnit() == unit)
+                .filter(lesson -> languagePreference == null || languagePreference.equals(lesson.getLanguagePreference()))
                 .filter(lesson -> specificArea != null || specificArea.equals(lesson.getSpecificArea()))
                 .flatMap(lesson -> lesson.getTest().stream())
                 .toList();
