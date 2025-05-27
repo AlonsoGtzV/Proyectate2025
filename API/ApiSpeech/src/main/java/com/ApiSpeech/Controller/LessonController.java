@@ -58,8 +58,8 @@ public class LessonController {
     @GetMapping("/questions/unit/{unit}")
     public List<Lesson.Test> getQuestionsByUnit(
             @PathVariable int unit,
-            @RequestParam(required = false) String languagePreference,
-            @RequestParam(required = false) String specificArea) {
+            @RequestParam(required = true) String languagePreference,
+            @RequestParam(required = true) String specificArea) {
         return lessonService.getQuestionsByUnit(unit, languagePreference, specificArea);
     }
 }

@@ -277,7 +277,6 @@ const styles = StyleSheet.create({
   logo: {
     width: 50,
     height: 50,
-    marginRight: 10,
     resizeMode: "contain",
     borderRadius: 25,
     backgroundColor: "#EFF1EC",

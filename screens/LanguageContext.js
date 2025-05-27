@@ -70,6 +70,7 @@ const translations = {
       blocked_unit: "Blocked unit",
       content_not_available: "Content not available",
       not_done: "Not done",
+      pending: "Pending",
     },
     chat: {
       message: "Hello! I'm Syn. I'm here to help you learn technical English. 😊",
@@ -231,6 +232,7 @@ const translations = {
       blocked_unit: "Unidad bloqueada",
       content_not_available: "Contenido no disponible",
       not_done: "Sin realizar",
+      pending: "Pendiente",
     },
     chat: {
       message: "¡Hola! Soy Syn. Estoy aquí para ayudarte a aprender inglés técnico. 😊",

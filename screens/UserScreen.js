@@ -182,11 +182,14 @@ export default function UserScreen({ navigation }) {
       backgroundColor: darkMode ? '#121212' : '#EFF0EB',
     },
     placeholderText: {
-      color: darkMode ? '#999' : '#ccc',
+      color: darkMode ? '#999' : 'rgba(127,122,122,0.9)',
     },
     footerLogo: {
       borderColor: darkMode ? '#555' : '#BDE4E6',
     },
+    infoText: {
+      color: darkMode ? '#E0E0E0' : '#333',
+    }
   });
 
   const modalStyles = StyleSheet.create({
@@ -250,7 +253,7 @@ export default function UserScreen({ navigation }) {
         <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
           {translate('user.personalInfo')}
         </Text>
-        <Text style={[styles.infoText, dynamicStyles.headerText]}>
+        <Text style={[styles.infoText, dynamicStyles.infoText]}>
           {user.cognitoUsername}
         </Text>
 
@@ -479,7 +482,6 @@ const styles = StyleSheet.create({
   logo: {
     width: 50,
     height: 50,
-    marginRight: 10,
     resizeMode: "contain",
     borderRadius: 25,
   },

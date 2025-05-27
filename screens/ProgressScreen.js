@@ -52,7 +52,7 @@ export default function ProgressScreen({ navigation }) {
       backgroundColor: darkMode ? "#1E1E1E" : "#FFFFFF",
     },
     unitTitle: {
-      color: darkMode ? "#E0E0E0" : "#333",
+      color: darkMode ? "#E0E0E0" : "#E0E0E0",
     },
     unitProgress: {
       color: darkMode ? "#BDE4E6" : "#2C5E86",
@@ -186,10 +186,14 @@ export default function ProgressScreen({ navigation }) {
                           <View style={styles.lessonsContainer}>
                             {item.lessons.map((lesson, lessonIndex) => (
                                 <View key={lessonIndex} style={[styles.lessonItem, dynamicStyles.lessonItem]}>
-                                  <Text style={[styles.lessonTitle, dynamicStyles.lessonTitle]}>
+                                  <Text
+                                      style={[styles.lessonTitle, dynamicStyles.lessonTitle, { flex: 0.7 }]}
+                                      numberOfLines={1}
+                                      ellipsizeMode="tail"
+                                  >
                                     {lesson.lessonContent.title}
                                   </Text>
-                                  <Text style={[styles.lessonProgress, dynamicStyles.lessonProgress]}>
+                                  <Text style={[styles.lessonProgress, dynamicStyles.lessonProgress, { flex: 0.3 }]}>
                                     {userData?.completedLessons?.some(completed => completed.lessonId === lesson.id)
                                         ? translate('progress.completed')
                                         : translate('progress.pending')}
@@ -266,24 +270,23 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#2C5E86",
     padding: 15,
     paddingTop: 50,
-    paddingBottom: 20,
-    marginBottom: 15,
+    justifyContent: "center",
+    gap: 10,
+    width: "100%",
+    marginBottom: 10,
   },
   logo: {
     width: 50,
     height: 50,
     resizeMode: "contain",
     borderRadius: 25,
-    marginRight: 10,
+    backgroundColor: "#EFF1EC", // Añadir fondo blanco
   },
   headerText: {
-    color: "white",
     fontSize: 22,
     fontWeight: "bold",
-    flex: 1,
   },
   keysContainer: {
     flexDirection: "row",
@@ -292,6 +295,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
+    position: "absolute",
+    right: 15,
   },
   keysText: {
     color: "white",
@@ -322,22 +327,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  lessonItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(0, 0, 0, 0.1)",
-  },
   lessonInfo: {
     flex: 1,
     marginRight: 10,
-  },
-  lessonTitle: {
-    fontSize: 15,
-    fontWeight: "500",
-    marginBottom: 4,
   },
   lessonDescription: {
     fontSize: 13,
@@ -412,7 +404,24 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     padding: 15,
     fontStyle: 'italic',
-  }
+  },
+  lessonItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0, 0, 0, 0.1)",
+  },
+  lessonTitle: {
+    fontSize: 15,
+    fontWeight: "500",
+    marginRight: 8,
+  },
+  lessonProgress: {
+    fontSize: 14,
+    textAlign: 'right',
+  },
 });
 
 
