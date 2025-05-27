@@ -119,32 +119,18 @@ export default function FinalTest({ route, navigation }) {
                 if (percentage >= 75) {
                     try {
                         const userId = await AsyncStorage.getItem('userId');
-                        // Primero verifica si el test ya fue completado anteriormente
-                        const response = await fetch(`http://10.0.2.2:8080/api/users/${userId}/check-test-completion/${unitId}`, {
+                        const keyResponse = await fetch(`http://10.0.2.2:8080/api/users/${userId}/add-key`, {
+                            method: 'PUT',
                             headers: {
                                 'Authorization': `Bearer ${token}`
                             }
                         });
 
-                        if (response.ok) {
-                            const { isFirstCompletion } = await response.json();
-
-                            if (isFirstCompletion) {
-                                // Solo añade la llave si es la primera vez que completa el test
-                                const keyResponse = await fetch(`http://10.0.2.2:8080/api/users/${userId}/add-key`, {
-                                    method: 'PUT',
-                                    headers: {
-                                        'Authorization': `Bearer ${token}`
-                                    }
-                                });
-
-                                if (keyResponse.ok) {
-                                    Alert.alert(
-                                        translate('test.success'),
-                                        translate('test.key_earned')
-                                    );
-                                }
-                            }
+                        if (keyResponse.ok) {
+                            Alert.alert(
+                                translate('test.success'),
+                                translate('test.key_earned')
+                            );
                         }
                     } catch (error) {
                         console.error('Error al procesar el resultado del test:', error);

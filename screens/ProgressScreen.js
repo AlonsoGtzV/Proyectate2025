@@ -28,14 +28,8 @@ export default function ProgressScreen({ navigation }) {
     headerText: {
       color: darkMode ? '#E0E0E0' : 'white',
     },
-    unitContainer: {
-      backgroundColor: darkMode ? '#1E1E1E' : '#fff',
-    },
     lessonItem: {
       backgroundColor: darkMode ? '#2A2A2A' : '#f8f9fa',
-    },
-    lessonTitle: {
-      color: darkMode ? '#E0E0E0' : '#333',
     },
     lessonDescription: {
       color: darkMode ? '#999' : '#666',
@@ -74,77 +68,71 @@ export default function ProgressScreen({ navigation }) {
     }
   });
 
+  const fetchProgress = async () => {
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      const userResponse = await fetch(`http://10.0.2.2:8080/api/users/${userId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const userData = await userResponse.json();
+
+      setKeysCount(userData.keys || 0);
+
+      const baseUnitsByArea = {
+        Software: [
+          { id: 1, unitTitle: translate('home.unit_1_title_software') },
+          { id: 2, unitTitle: translate('home.unit_2_title_software') },
+          { id: 3, unitTitle: translate('home.unit_3_title_software') },
+        ],
+        Electronics: [
+          { id: 1, unitTitle: translate('home.unit_1_title_electronics') },
+          { id: 2, unitTitle: translate('home.unit_2_title_electronics') },
+          { id: 3, unitTitle: translate('home.unit_3_title_electronics') },
+        ],
+      };
+
+      const area = userData.specificArea || "Software";
+      const baseUnits = baseUnitsByArea[area] || baseUnitsByArea.Software;
+
+      const lessonsResponse = await fetch(`http://10.0.2.2:8080/api/lessons/filter?languagePreference=${userData.languagePreference}&specificArea=${area}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const lessons = await lessonsResponse.json();
+
+      const lessonsByUnit = {};
+      lessons.forEach(lesson => {
+        const unitId = lesson.unit || 1;
+        if (!lessonsByUnit[unitId]) lessonsByUnit[unitId] = [];
+        lessonsByUnit[unitId].push(lesson);
+      });
+
+      const processedUnits = baseUnits.map(baseUnit => ({
+        ...baseUnit,
+        lessons: lessonsByUnit[baseUnit.id] || [],
+      }));
+
+      setUnits(processedUnits);
+      setUserData(userData);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error al cargar progreso:', error);
+      setLoading(false);
+    }
+  };
+
+// Primer useEffect para la carga inicial
   useEffect(() => {
-    const fetchProgress = async () => {
-      try {
-        const userId = await AsyncStorage.getItem('userId');
-        // Primero obtener el usuario para saber su área específica
-        const userResponse = await fetch(`http://10.0.2.2:8080/api/users/${userId}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const userData = await userResponse.json();
-
-        // Definir los títulos base de las unidades según el área
-        const baseUnitsByArea = {
-          Software: [
-            { id: 1, unitTitle: translate('home.unit_1_title_software') },
-            { id: 2, unitTitle: translate('home.unit_2_title_software') },
-            { id: 3, unitTitle: translate('home.unit_3_title_software') },
-          ],
-          Electronics: [
-            { id: 1, unitTitle: translate('home.unit_1_title_electronics') },
-            { id: 2, unitTitle: translate('home.unit_2_title_electronics') },
-            { id: 3, unitTitle: translate('home.unit_3_title_electronics') },
-          ],
-        };
-
-        // Seleccionar las unidades según el área del usuario
-        const area = userData.specificArea || "Software";
-        const baseUnits = baseUnitsByArea[area] || baseUnitsByArea.Software;
-
-        // Obtener las lecciones y el progreso
-        const lessonsResponse = await fetch(`http://10.0.2.2:8080/api/lessons/filter?languagePreference=${userData.languagePreference}&specificArea=${area}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const lessons = await lessonsResponse.json();
-
-        // Agrupar lecciones por unidad
-        const lessonsByUnit = {};
-        lessons.forEach(lesson => {
-          const unitId = lesson.unit || 1;
-          if (!lessonsByUnit[unitId]) lessonsByUnit[unitId] = [];
-          lessonsByUnit[unitId].push(lesson);
-        });
-
-        // Combinar la información base de las unidades con las lecciones
-        const processedUnits = baseUnits.map(baseUnit => ({
-          ...baseUnit,
-          lessons: lessonsByUnit[baseUnit.id] || [],
-        }));
-
-        setUnits(processedUnits);
-        setUserData(userData);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error al cargar progreso:', error);
-        setLoading(false);
-      }
-    };
-
     fetchProgress();
   }, [token, translate]);
 
+// Segundo useEffect para actualizar al enfocar la pantalla
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchProgress();
+    });
 
-  const renderLesson = ({ item }) => (
-      <View style={[styles.lessonContainer]}>
-        <Text style={[styles.lessonTitle, dynamicStyles.lessonTitle]}>
-          {item.title}
-        </Text>
-        <Text style={[styles.lessonProgress, dynamicStyles.lessonProgress]}>
-          {item.completed ? translate('progress.completed') : translate('progress.not_done')}
-        </Text>
-      </View>
-  );
+    return unsubscribe;
+  }, [navigation, token]);
 
   if (loading) {
     return (
@@ -269,7 +257,7 @@ export default function ProgressScreen({ navigation }) {
         </View>
           </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
