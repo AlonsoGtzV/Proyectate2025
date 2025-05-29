@@ -1,99 +1,65 @@
-package com.ApiSpeech.Model;
+package com.ApiSpeech.Dto;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
+import jakarta.validation.constraints.Null;
 import java.util.List;
-import org.hibernate.annotations.GenericGenerator;
 
-@Entity
-@Table(name = "lessons")
-public class Lesson {
-    @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
+public class LessonCreationDto {
+    @Null(message = "El ID debe ser nulo para creación")
     private String id;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "lesson_content_id")
-    private LessonContent lessonContent;
-
-    @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private Test test;
-
+    private LessonContentDto lessonContent;
+    private TestDto test;  // Cambiado de List<TestDto> a TestDto
     private String englishLevel;
     private String languagePreference;
     private String specificArea;
     private Integer unit;
-
-    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<Mp3File> mp3Files;
+    private List<Mp3FileDto> mp3Files;
 
     public String getId() {
         return id;
     }
-
     public void setId(String id) {
         this.id = id;
     }
-
-    public LessonContent getLessonContent() {
+    public LessonContentDto getLessonContent() {
         return lessonContent;
     }
-
-    public void setLessonContent(LessonContent lessonContent) {
+    public void setLessonContent(LessonContentDto lessonContent) {
         this.lessonContent = lessonContent;
     }
-
-    public Test getTest() {
+    public TestDto getTest() {
         return test;
     }
-
-    public void setTest(Test test) {
+    public void setTest(TestDto test) {
         this.test = test;
     }
-
     public String getEnglishLevel() {
         return englishLevel;
     }
-
     public void setEnglishLevel(String englishLevel) {
         this.englishLevel = englishLevel;
     }
-
     public String getLanguagePreference() {
         return languagePreference;
     }
-
     public void setLanguagePreference(String languagePreference) {
         this.languagePreference = languagePreference;
     }
-
     public String getSpecificArea() {
         return specificArea;
     }
-
     public void setSpecificArea(String specificArea) {
         this.specificArea = specificArea;
     }
-
     public Integer getUnit() {
         return unit;
     }
-
     public void setUnit(Integer unit) {
         this.unit = unit;
     }
-
-    public List<Mp3File> getMp3Files() {
+    public List<Mp3FileDto> getMp3Files() {
         return mp3Files;
     }
-
-    public void setMp3Files(List<Mp3File> mp3Files) {
+    public void setMp3Files(List<Mp3FileDto> mp3Files) {
         this.mp3Files = mp3Files;
     }
 }

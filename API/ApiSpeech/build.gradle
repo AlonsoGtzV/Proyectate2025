@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.2.5'
     id 'io.spring.dependency-management' version '1.1.4'
+    id 'com.github.johnrengelman.shadow' version '8.1.1' // Plugin ShadowJar
 }
 
 group = 'com.ApiSpeech'
@@ -13,19 +14,46 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+    // Spring Boot starters
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'software.amazon.awssdk:dynamodb-enhanced'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    implementation platform("software.amazon.awssdk:bom:2.25.6")
-    implementation 'software.amazon.awssdk:cognitoidentityprovider'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // SpringDoc OpenAPI (Swagger)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    // AWS
+    implementation 'com.amazonaws.serverless:aws-serverless-java-container-springboot3:2.0.0'
+    implementation platform('software.amazon.awssdk:bom:2.25.6')
+    implementation 'software.amazon.awssdk:cognitoidentityprovider'
+
+    // Hibernate (para UUID generation)
+    implementation 'org.hibernate:hibernate-core:6.4.4.Final'
+
+    // Database
     runtimeOnly 'org.postgresql:postgresql'
 
+    // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
+
+// Configuración del shadowJar para AWS Lambda
+shadowJar {
+    archiveBaseName.set('ApiSpeechLambda')
+    archiveClassifier.set('') // No classifier, AWS Lambda necesita un .jar simple
+    archiveVersion.set('')    // Versión vacía (opcional)
+    mergeServiceFiles()       // Importante para que Spring Boot funcione bien
+    manifest {
+        attributes 'Main-Class': 'com.ApiSpeech.ApiSpeech'
+    }
+}
+
+// Opcional: si quieres que el build principal genere el shadowJar directamente
+//tasks.build.dependsOn(shadowJar)

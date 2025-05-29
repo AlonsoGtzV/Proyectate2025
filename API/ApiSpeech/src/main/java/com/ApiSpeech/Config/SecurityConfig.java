@@ -35,6 +35,7 @@ public class SecurityConfig {
                                 "/api/lessons",
                                 "/api/lessons/{id}",
                                 "/api/lessons/questions/unit/**",
+                                "/api/lessons/minimal/filter",
                                 "/swagger-ui/**",     // Permite Swagger UI
                                 "/v3/api-docs/**",
                                 "/error"// Permite la documentación OpenAPI

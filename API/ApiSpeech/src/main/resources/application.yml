@@ -1,11 +1,11 @@
 server:
-  port: 8080
+  port: 8080  # Esto no se usa en Lambda, pero lo dejamos para local
 
 spring:
   datasource:
-    url: jdbc:postgresql://synspeechdb.cmn5b0a2bh6p.us-east-1.rds.amazonaws.com:5432/users?ssl=true&sslmode=verify-full&sslrootcert=src/main/resources/us-east-1-bundle.pem
-    username: pacoeco
-    password: jfaap234
+    url: jdbc:postgresql://synspeechdb.cmn5b0a2bh6p.us-east-1.rds.amazonaws.com:5432/users
+    username: ${DB_USERNAME:pacoeco}
+    password: ${DB_PASSWORD:jfaap234}
     driver-class-name: org.postgresql.Driver
 
   security:
@@ -13,15 +13,15 @@ spring:
       client:
         registration:
           cognito:
-            client-id: 4aruvisqmaoigb217hij76aju5
+            client-id: ${COGNITO_CLIENT_ID:4aruvisqmaoigb217hij76aju5}
             scope:
               - phone
               - openid
               - email
-            redirect-uri: https://d84l1y8p4kdic.cloudfront.net
+            redirect-uri: ${COGNITO_REDIRECT_URI:https://d84l1y8p4kdic.cloudfront.net}
         provider:
           cognito:
-            issuerUri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_9K4qyEk4E
+            issuerUri: ${COGNITO_ISSUER_URI:https://cognito-idp.us-east-1.amazonaws.com/us-east-1_9K4qyEk4E}
             user-name-attribute: username
 
   jpa:
@@ -34,9 +34,9 @@ spring:
 
 aws:
   cognito:
-    userPoolId: us-east-1_czPnvGGWd
-    clientId: 4aruvisqmaoigb217hij76aju5
-    clientSecret: 1l0bf8ccp78namk5u5l2b7fbqrquerra4hqi915mirb3alv13a6n
+    userPoolId: ${COGNITO_USER_POOL_ID:us-east-1_czPnvGGWd}
+    clientId: ${COGNITO_CLIENT_ID:4aruvisqmaoigb217hij76aju5}
+    clientSecret: ${COGNITO_CLIENT_SECRET:1l0bf8ccp78namk5u5l2b7fbqrquerra4hqi915mirb3alv13a6n}
 
 springdoc:
   swagger-ui:

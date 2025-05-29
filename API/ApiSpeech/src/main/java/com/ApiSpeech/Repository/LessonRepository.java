@@ -1,56 +1,40 @@
 package com.ApiSpeech.Repository;
 
+import com.ApiSpeech.Dto.LessonMinimalDto;
 import com.ApiSpeech.Model.Lesson;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Repository
-public class LessonRepository {
+public interface LessonRepository extends JpaRepository<Lesson, String> {
 
-    private final DynamoDbTable<Lesson> lessonTable;
+    // Query personalizada para filtros
+    @Query("SELECT l FROM Lesson l WHERE " +
+            "(:englishLevel IS NULL OR l.englishLevel = :englishLevel) AND " +
+            "(:languagePreference IS NULL OR l.languagePreference = :languagePreference) AND " +
+            "(:specificArea IS NULL OR l.specificArea = :specificArea) AND " +
+            "(:unit IS NULL OR l.unit = :unit)")
 
-    public LessonRepository(DynamoDbClient dynamoDbClient) {
-        DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient.builder()
-                .dynamoDbClient(dynamoDbClient)
-                .build();
-        this.lessonTable = enhancedClient.table("lessons", TableSchema.fromBean(Lesson.class));
-    }
+    List<Lesson> findByFilters(
+            @Param("englishLevel") String englishLevel,
+            @Param("languagePreference") String languagePreference,
+            @Param("specificArea") String specificArea,
+            @Param("unit") Integer unit);
 
-    public Lesson save(Lesson lesson) {
-        lessonTable.putItem(lesson);
-        return lesson;
-    }
-
-    public Optional<Lesson> findById(String id) {
-        return Optional.ofNullable(lessonTable.getItem(r -> r.key(k -> k.partitionValue(id))));
-    }
-
-    public Iterable<Lesson> findAll() {
-        return lessonTable.scan().items();
-    }
-
-    public boolean existsById(String id) {
-        return findById(id).isPresent();
-    }
-
-    public List<Lesson> findByFilters(String englishLevel, String languagePreference, String specificArea, Integer unit) {
-        return lessonTable.scan()
-                .items()
-                .stream()
-                .filter(lesson -> (englishLevel == null || englishLevel.equals(lesson.getEnglishLevel())) &&
-                        (languagePreference == null || languagePreference.equals(lesson.getLanguagePreference())) &&
-                        (specificArea == null || specificArea.equals(lesson.getSpecificArea())) &&
-                        (unit == null || unit.equals(lesson.getUnit())))
-                .collect(Collectors.toList());
-    }
-    public void deleteById(String id) {
-        lessonTable.deleteItem(r -> r.key(k -> k.partitionValue(id)));
-    }
+    @Query("SELECT NEW com.ApiSpeech.Dto.LessonMinimalDto(" +
+            "l.id, lc.title, lc.text, l.languagePreference, " +
+            "l.specificArea, l.unit) " +
+            "FROM Lesson l JOIN l.lessonContent lc WHERE " +
+            "(:languagePreference IS NULL OR l.languagePreference = :languagePreference) AND " +
+            "(:specificArea IS NULL OR l.specificArea = :specificArea) AND " +
+            "(:unit IS NULL OR l.unit = :unit)")
+    List<LessonMinimalDto> findMinimalLessonsByFilters(
+            @Param("languagePreference") String languagePreference,
+            @Param("specificArea") String specificArea,
+            @Param("unit") Integer unit);
 }
+
